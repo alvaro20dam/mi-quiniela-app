@@ -7,7 +7,8 @@
 
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 // Reemplaza "tu-app.onrender.com" con la URL real que te dé Render
-const API_BASE = isLocalhost ? 'http://localhost:5000/api' : 'https://tu-app.onrender.com/api';
+const API_BASE = isLocalhost ? 'http://localhost:5000/api' : 'https://quiniela-backend.onrender.com/api';
+
 
 /**
  * Obtiene el token CSRF de la cookie csrf_access_token (no HttpOnly, legible por JS).
