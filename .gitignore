@@ -1,0 +1,22 @@
+# Entorno Virtual de Python
+backend/venv/
+backend/.pytest_cache/
+backend/__pycache__/
+backend/routes/__pycache__/
+backend/utils/__pycache__/
+
+# Archivos de entorno y credenciales sensibles
+backend/.env
+
+# Configuraciones de editores
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Sistema
+.DS_Store
+Thumbs.db

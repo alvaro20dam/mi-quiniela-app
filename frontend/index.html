@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Quinielas La Liga — Pronósticos deportivos semanales. Compite con tus amigos y demuestra tu conocimiento del fútbol español." />
+  <meta name="theme-color" content="#0a0e1a" />
+  <title>Iniciar Sesión — Quinielas La Liga</title>
+
+  <!-- Preconnect fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/design-system.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <style>
+    /* Estilos específicos de la página de login */
+    .hidden { display: none !important; }
+
+    .tab-group {
+      display: flex;
+      background: var(--color-bg-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-1);
+      gap: var(--space-1);
+      margin-bottom: var(--space-6);
+    }
+
+    .tab-group .btn {
+      flex: 1;
+      border-radius: calc(var(--radius-md) - 2px);
+      padding: var(--space-2) var(--space-4);
+      transition: all var(--transition-fast);
+    }
+
+    .features-list {
+      margin-top: var(--space-8);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .feature-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--color-bg-glass);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: var(--text-base);
+    }
+
+    /* Input password toggle */
+    .password-wrapper {
+      position: relative;
+    }
+    .password-toggle {
+      position: absolute;
+      right: var(--space-3);
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      font-size: var(--text-lg);
+      padding: var(--space-1);
+      line-height: 1;
+      transition: color var(--transition-fast);
+    }
+    .password-toggle:hover { color: var(--color-text-primary); }
+    .password-wrapper .form-input { padding-right: 3rem; }
+
+    /* Decoración de fondo */
+    .bg-decoration {
+      position: fixed;
+      pointer-events: none;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .bg-decoration::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(230,57,70,0.12) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .bg-decoration::after {
+      content: '';
+      position: absolute;
+      bottom: -10%;
+      right: -5%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(244,167,38,0.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .auth-container { position: relative; z-index: 1; }
+  </style>
+</head>
+<body>
+  <!-- Decoración de fondo -->
+  <div class="bg-decoration" aria-hidden="true"></div>
+
+  <!-- Contenedor principal de autenticación -->
+  <main class="auth-container">
+    <div class="auth-card">
+
+      <!-- Logo -->
+      <div class="auth-logo">
+        <div class="logo-icon-lg" aria-hidden="true">⚽</div>
+        <h1 class="auth-title display-title">Quinielas <span style="color:var(--color-accent)">La Liga</span></h1>
+        <p class="auth-subtitle">Pronósticos deportivos semanales</p>
+      </div>
+
+      <!-- Tabs Login / Registro -->
+      <div class="tab-group" role="tablist" aria-label="Modo de acceso">
+        <button id="tab-login" class="btn btn-primary" role="tab" aria-selected="true" aria-controls="section-login">
+          Iniciar Sesión
+        </button>
+        <button id="tab-register" class="btn btn-ghost" role="tab" aria-selected="false" aria-controls="section-register">
+          Registrarse
+        </button>
+      </div>
+
+      <!-- ── SECCIÓN LOGIN ── -->
+      <section id="section-login" role="tabpanel" aria-labelledby="tab-login">
+        <form id="login-form" class="auth-form" novalidate>
+          <!-- Alert de error -->
+          <div id="login-alert" aria-live="polite" aria-atomic="true"></div>
+
+          <div class="form-group">
+            <label class="form-label" for="login-email">
+              Correo electrónico <span class="required">*</span>
+            </label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">📧</span>
+              <input
+                id="login-email"
+                name="email"
+                type="email"
+                class="form-input"
+                placeholder="tu@correo.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="login-password">
+              Contraseña <span class="required">*</span>
+            </label>
+            <div class="password-wrapper">
+              <input
+                id="login-password"
+                name="password"
+                type="password"
+                class="form-input"
+                placeholder="Tu contraseña"
+                autocomplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                data-toggle-password="login-password"
+                aria-label="Mostrar/ocultar contraseña"
+              >👁️</button>
+            </div>
+          </div>
+
+          <button id="btn-login" type="submit" class="btn btn-primary btn-full btn-lg">
+            <span class="btn-text">Iniciar Sesión</span>
+          </button>
+        </form>
+
+        <!-- Características del servicio -->
+        <div class="features-list">
+          <div class="feature-item">
+            <div class="feature-icon">🏆</div>
+            <span>Compite en clasificaciones semanales de La Liga</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">⚡</div>
+            <span>Sistema de puntos con marcador exacto (5 pts) y tendencia (3 pts)</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🔒</div>
+            <span>Plataforma segura con cifrado de extremo a extremo</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SECCIÓN REGISTRO ── -->
+      <section id="section-register" class="hidden" role="tabpanel" aria-labelledby="tab-register">
+        <form id="register-form" class="auth-form" novalidate>
+          <div id="register-alert" aria-live="polite" aria-atomic="true"></div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-nombre">
+              Nombre completo <span class="required">*</span>
+            </label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">👤</span>
+              <input
+                id="reg-nombre"
+                name="nombre"
+                type="text"
+                class="form-input"
+                placeholder="Tu nombre"
+                autocomplete="name"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-email">
+              Correo electrónico <span class="required">*</span>
+            </label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">📧</span>
+              <input
+                id="reg-email"
+                name="email"
+                type="email"
+                class="form-input"
+                placeholder="tu@correo.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-password">
+              Contraseña <span class="required">*</span>
+            </label>
+            <div class="password-wrapper">
+              <input
+                id="reg-password"
+                name="password"
+                type="password"
+                class="form-input"
+                placeholder="Mínimo 8 caracteres"
+                autocomplete="new-password"
+                required
+                minlength="8"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                data-toggle-password="reg-password"
+                aria-label="Mostrar/ocultar contraseña"
+              >👁️</button>
+            </div>
+            <span class="form-hint">Mínimo 8 caracteres para mayor seguridad.</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-password2">
+              Confirmar contraseña <span class="required">*</span>
+            </label>
+            <div class="password-wrapper">
+              <input
+                id="reg-password2"
+                name="password2"
+                type="password"
+                class="form-input"
+                placeholder="Repite tu contraseña"
+                autocomplete="new-password"
+                required
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                data-toggle-password="reg-password2"
+                aria-label="Mostrar/ocultar contraseña"
+              >👁️</button>
+            </div>
+          </div>
+
+          <button id="btn-register" type="submit" class="btn btn-primary btn-full btn-lg">
+            <span class="btn-text">Crear Cuenta</span>
+          </button>
+
+          <p style="font-size:var(--text-xs);color:var(--color-text-muted);text-align:center;line-height:1.5">
+            Al registrarte aceptas nuestros términos de servicio.
+            Tu contraseña se almacena de forma cifrada y segura.
+          </p>
+        </form>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Toast container -->
+  <div id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

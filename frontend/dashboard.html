@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dashboard de pronósticos — Quinielas La Liga. Envía tus predicciones de goles para la jornada actual." />
+  <meta name="theme-color" content="#0a0e1a" />
+  <title>Mi Quiniela — Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link rel="stylesheet" href="css/design-system.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <style>
+    .counter-value {
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Highlight cuando se modifica */
+    .score-counter.modified {
+      border-color: var(--color-accent);
+    }
+
+    /* Sidebar en mobile se oculta */
+    @media (max-width: 1023px) {
+      .sidebar { display: none; }
+      .dashboard-layout { display: block; }
+    }
+
+    /* Ocultar "Salir" en mobile para ahorrar espacio en header */
+    @media (max-width: 767px) {
+      #btn-logout { display: none; }
+      .header-user { gap: var(--space-2); }
+    }
+  </style>
+</head>
+<body class="bg-gradient-main">
+
+  <!-- ── HEADER ──────────────────────────────────────────── -->
+  <header class="app-header" role="banner">
+    <div class="container header-inner">
+
+      <!-- Logo -->
+      <a href="dashboard.html" class="header-logo" aria-label="Quinielas La Liga — Inicio">
+        <div class="logo-icon" aria-hidden="true">⚽</div>
+        <span class="logo-text display-title">Quinielas <span>LaLiga</span></span>
+      </a>
+
+      <!-- Nav Desktop -->
+      <nav class="header-nav" aria-label="Navegación principal">
+        <a href="dashboard.html" class="nav-link active" aria-current="page">
+          <span aria-hidden="true">🎯</span> Mi Quiniela
+        </a>
+        <a href="mis-quinielas.html" class="nav-link">
+          <span aria-hidden="true">📋</span> Mis Quinielas
+        </a>
+        <a href="ranking.html" class="nav-link">
+          <span aria-hidden="true">🏆</span> Clasificación
+        </a>
+      </nav>
+
+      <!-- User área -->
+      <div class="header-user">
+        <!-- Countdown chip (compact, shown ≥480px) -->
+        <div id="header-countdown" class="header-countdown" style="display:none" aria-live="polite" aria-label="Tiempo de cierre de la jornada">
+          <div class="header-countdown-dot" aria-hidden="true"></div>
+          <span id="header-countdown-text">—</span>
+        </div>
+
+        <span id="sub-badge" class="badge badge-gold" style="display:none"></span>
+        <div id="user-avatar" class="user-avatar" title="Mi perfil" aria-label="Avatar de usuario">?</div>
+        <button id="btn-logout" class="btn btn-ghost btn-sm" aria-label="Cerrar sesión">
+          Salir
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── MAIN CONTENT ─────────────────────────────────────── -->
+  <main class="page-content" id="main-content">
+    <div class="container">
+
+      <!-- Cabecera de Jornada (countdown + título) -->
+      <div class="jornada-header glass-card animate-fadeInUp" id="jornada-header" aria-live="polite">
+        <!-- Cargando... skeleton -->
+        <div class="skeleton" style="height:24px;width:200px;border-radius:4px"></div>
+        <div class="skeleton" style="height:36px;width:180px;border-radius:4px"></div>
+      </div>
+
+      <!-- Carrusel de Jornadas -->
+      <div id="jornada-carousel" class="jornada-carousel animate-fadeInUp" style="animation-delay:0.05s" role="tablist" aria-label="Selector de jornadas">
+        <!-- Se popula dinámicamente -->
+      </div>
+
+      <!-- Layout principal: sidebar + grid -->
+      <div class="dashboard-layout">
+
+        <!-- Sidebar con estadísticas y selector de jornadas (desktop) -->
+        <aside class="sidebar" aria-label="Estadísticas de la jornada">
+          <div class="sidebar-section">
+            <h4>Tu progreso</h4>
+            <div class="sidebar-stat">
+              <span class="label">Pronósticos</span>
+              <span class="value" id="sidebar-completados">0/0</span>
+            </div>
+            <div class="progress-bar" aria-label="Progreso de pronósticos">
+              <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <h4>Reglas de puntuación</h4>
+            <div class="sidebar-stat">
+              <span class="label">🎯 Marcador exacto</span>
+              <span class="value badge badge-gold">5 pts</span>
+            </div>
+            <div class="sidebar-stat">
+              <span class="label">⚡ Tendencia + 1 gol</span>
+              <span class="value badge badge-success">4 pts</span>
+            </div>
+            <div class="sidebar-stat">
+              <span class="label">✅ Solo tendencia</span>
+              <span class="value badge badge-info">3 pts</span>
+            </div>
+            <div class="sidebar-stat">
+              <span class="label">❌ Sin acierto</span>
+              <span class="value badge badge-error">0 pts</span>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <h4>Información</h4>
+            <div class="sidebar-stat">
+              <span class="label">Liga</span>
+              <span class="value">🇪🇸 La Liga</span>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Grid de Partidos -->
+        <section aria-label="Partidos de la jornada">
+          <div id="matches-grid" class="matches-grid" role="list">
+            <!-- Los partidos se renderizan dinámicamente -->
+          </div>
+        </section>
+
+      </div><!-- /dashboard-layout -->
+
+    </div><!-- /container -->
+  </main>
+
+  <!-- ── BARRA DE ENVÍO STICKY ─────────────────────────────── -->
+  <footer class="submit-bar" role="contentinfo" aria-label="Enviar quiniela">
+    <div class="container submit-bar-inner">
+      <div>
+        <div class="submit-progress" id="submit-progress-text">
+          Pronósticos: <strong>0/0</strong>
+        </div>
+        <div class="progress-bar" style="width:200px;margin-top:6px" aria-hidden="true">
+          <div class="progress-fill" id="progress-fill-bar" style="width:0%"></div>
+        </div>
+      </div>
+      <button
+        id="btn-submit-quiniela"
+        class="btn btn-primary btn-lg animate-pulse-glow"
+        onclick="submitQuiniela()"
+        aria-label="Enviar mis pronósticos para esta jornada"
+      >
+        <span class="btn-text">🎯 Enviar Quiniela</span>
+      </button>
+    </div>
+  </footer>
+
+  <!-- ── BOTTOM NAVIGATION (Mobile) ────────────────────────── -->
+  <nav class="bottom-nav" aria-label="Navegación principal móvil">
+    <div class="bottom-nav-inner">
+      <a href="dashboard.html" class="bottom-nav-item active" aria-current="page" id="bnav-dashboard">
+        <span class="bottom-nav-icon" aria-hidden="true">🎯</span>
+        <span>Quiniela</span>
+      </a>
+      <a href="mis-quinielas.html" class="bottom-nav-item" id="bnav-mis">
+        <span class="bottom-nav-icon" aria-hidden="true">📋</span>
+        <span>Mis Q.</span>
+      </a>
+      <a href="ranking.html" class="bottom-nav-item" id="bnav-ranking">
+        <span class="bottom-nav-icon" aria-hidden="true">🏆</span>
+        <span>Ranking</span>
+      </a>
+      <button class="bottom-nav-item" id="bnav-logout" aria-label="Cerrar sesión">
+        <span class="bottom-nav-icon" aria-hidden="true">🚪</span>
+        <span>Salir</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Toast -->
+  <div id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+
+  <script>
+    // Sincronizar ambas barras de progreso
+    document.addEventListener('DOMContentLoaded', () => {
+      const origFill = document.getElementById('progress-fill');
+      const barFill  = document.getElementById('progress-fill-bar');
+      if (origFill && barFill) {
+        const observer = new MutationObserver(() => {
+          barFill.style.width = origFill.style.width;
+        });
+        observer.observe(origFill, { attributes: true, attributeFilter: ['style'] });
+      }
+
+      // Sync sidebar counter
+      const sidebarEl  = document.getElementById('sidebar-completados');
+      const progressEl = document.getElementById('submit-progress-text');
+      if (sidebarEl && progressEl) {
+        new MutationObserver(() => {
+          const m = progressEl.innerHTML.match(/(\d+\/\d+)/);
+          if (m) sidebarEl.textContent = m[1];
+        }).observe(progressEl, { childList: true, subtree: true });
+      }
+
+      // Bottom nav logout
+      const bnavLogout = document.getElementById('bnav-logout');
+      if (bnavLogout) {
+        bnavLogout.addEventListener('click', async () => {
+          await api.post('/auth/logout', {});
+          window.location.href = 'index.html';
+        });
+      }
+    });
+  </script>
+</body>
+</html>
