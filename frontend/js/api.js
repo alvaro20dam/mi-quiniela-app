@@ -7,7 +7,7 @@
 
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 // Reemplaza "tu-app.onrender.com" con la URL real que te dé Render
-const API_BASE = isLocalhost ? 'http://localhost:5000/api' : 'https://quiniela-backend.onrender.com/api';
+const API_BASE = isLocalhost ? 'http://localhost:5000/api' : 'https://quiniela-backend-wtrs.onrender.com/api';
 
 
 /**
