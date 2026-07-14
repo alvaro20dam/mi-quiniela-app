@@ -24,11 +24,18 @@ def create_app(config_class=None):
     cfg = config_class or get_config()
     app.config.from_object(cfg)
 
-    # ── CORS — permitir localhost en cualquier puerto en desarrollo ──
-    CORS(app, supports_credentials=True, origins=[
+    import os
+    # ── CORS — permitir localhost y dominios de Vercel / producción ──
+    allowed_origins = [
         r"http://localhost:\d+",
         r"http://127\.0\.0\.1:\d+",
-    ])
+        r"https://.*\.vercel\.app"
+    ]
+    frontend_url = os.environ.get("FRONTEND_URL")
+    if frontend_url:
+        allowed_origins.append(frontend_url)
+
+    CORS(app, supports_credentials=True, origins=allowed_origins)
 
     # ── JWT Manager ──────────────────────────────────────────────────────────
     jwt = JWTManager(app)
