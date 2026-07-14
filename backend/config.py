@@ -22,7 +22,7 @@ class Config:
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_COOKIE_SECURE = os.environ.get("JWT_COOKIE_SECURE", "False").lower() == "true"
     JWT_COOKIE_HTTPONLY = True          # Mitiga XSS — JS no puede leer la cookie
-    JWT_COOKIE_SAMESITE = "Lax"         # Mitiga CSRF, permite enviar cookies entre puertos de localhost
+    JWT_COOKIE_SAMESITE = "None" if os.environ.get("FLASK_ENV", "development") == "production" else "Lax"
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)
     JWT_COOKIE_CSRF_PROTECT = True      # CSRF token double-submit pattern
 
