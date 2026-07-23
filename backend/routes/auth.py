@@ -59,15 +59,27 @@ def register():
     # ── Hash de contraseña con bcrypt (salted, cost factor 12) ──────────────
     password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(rounds=12))
 
-    query(
+    # ── Crear usuario con suscripción activa de bienvenida (30 días) ─────────
+    user_result = query(
         """
         INSERT INTO usuarios (email, nombre, password_hash, rol, estado_suscripcion)
-        VALUES (%s, %s, %s, 'Cliente', FALSE)
+        VALUES (%s, %s, %s, 'Cliente', TRUE)
+        RETURNING id
         """,
-        (email, nombre, password_hash.decode("utf-8"))
+        (email, nombre, password_hash.decode("utf-8")),
+        fetchone=True
     )
 
-    return jsonify({"message": "Registro exitoso. Activa tu suscripción para participar."}), 201
+    if user_result:
+        query(
+            """
+            INSERT INTO suscripciones (usuario_id, plan_name, fecha_vigencia, estado_activo)
+            VALUES (%s, 'Plan Gratuito (Bienvenida)', NOW() + INTERVAL '30 days', TRUE)
+            """,
+            (user_result[0],)
+        )
+
+    return jsonify({"message": "Registro exitoso. ¡Tu cuenta y suscripción están activas!"}), 201
 
 
 @auth_bp.route("/login", methods=["POST"])

@@ -22,13 +22,19 @@ const state = {
 
 // Emojis de equipos de La Liga (mapa visual)
 const TEAM_EMOJIS = {
-  'Real Madrid': '👑', 'FC Barcelona': '🔵🔴', 'Atlético de Madrid': '❤️🤍',
-  'Sevilla FC': '⚪🔴', 'Real Betis': '🟢⚪', 'Real Sociedad': '🔵⚪',
-  'Valencia CF': '🦇', 'Villarreal CF': '🟡', 'Athletic Club': '🔴⚪',
-  'Rayo Vallecano': '🔴⚪', 'Osasuna': '🔴🔵', 'Celta de Vigo': '🔵',
-  'Getafe CF': '🔵', 'Espanyol': '🔵⚪', 'UD Las Palmas': '🟡🔵',
-  'Deportivo Alavés': '🔵⚪', 'RCD Mallorca': '🔴', 'Girona FC': '🔴⚪',
-  'Leganés': '🔵⚪', 'Real Valladolid': '🟣',
+  'Real Madrid': '👑',
+  'FC Barcelona': '🔵', 'Barcelona': '🔵',
+  'Atlético de Madrid': '🔴', 'Atletico de Madrid': '🔴',
+  'Sevilla FC': '⚪', 'Sevilla': '⚪',
+  'Real Betis': '🟢', 'Betis': '🟢',
+  'Real Sociedad': '🔵',
+  'Valencia CF': '🦇', 'Valencia': '🦇',
+  'Villarreal CF': '🟡', 'Villarreal': '🟡',
+  'Athletic Club': '🦁',
+  'Rayo Vallecano': '⚡', 'Osasuna': '🔴', 'Celta de Vigo': '🩵',
+  'Getafe CF': '🔵', 'Getafe': '🔵', 'Espanyol': '🔵', 'UD Las Palmas': '🌴',
+  'Deportivo Alavés': '🔵', 'RCD Mallorca': '🔴', 'Girona FC': '🔴',
+  'Leganés': '🥒', 'Real Valladolid': '🟣',
 };
 
 document.addEventListener('DOMContentLoaded', async () => {

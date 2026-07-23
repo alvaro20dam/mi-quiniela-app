@@ -1,0 +1,215 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Panel de Administracion — Quinielas La Liga. Supervision completa de usuarios, suscripciones, quinielas e historial." />
+  <meta name="theme-color" content="#0a0e1a" />
+  <title>Mi Quiniela — Panel Administrador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="css/design-system.css?v=4" />
+  <link rel="stylesheet" href="css/components.css?v=4" />
+  <link rel="stylesheet" href="css/responsive.css?v=4" />
+  <style>
+    .global-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--space-3);margin-bottom:var(--space-6)}
+    .global-metric-card{background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;align-items:center;gap:var(--space-3);transition:border-color var(--transition-fast),transform var(--transition-fast)}
+    .global-metric-card:hover{border-color:var(--color-accent);transform:translateY(-2px)}
+    .global-metric-icon{font-size:1.75rem;flex-shrink:0}
+    .global-metric-info{flex:1;min-width:0}
+    .global-metric-value{font-size:var(--text-2xl);font-weight:800;color:var(--color-text-primary);line-height:1;font-family:var(--font-display)}
+    .global-metric-label{font-size:10px;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+    .admin-tabs{display:flex;gap:0;border-bottom:2px solid var(--color-border);margin-bottom:var(--space-6);overflow-x:auto;scrollbar-width:none}
+    .admin-tabs::-webkit-scrollbar{display:none}
+    .admin-tab{padding:var(--space-3) var(--space-5);background:transparent;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--color-text-muted);font-weight:600;font-size:var(--text-sm);cursor:pointer;transition:all var(--transition-fast);white-space:nowrap;flex-shrink:0}
+    .admin-tab:hover{color:var(--color-text-primary)}
+    .admin-tab.active{color:var(--color-accent);border-bottom-color:var(--color-accent)}
+    .jornada-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--space-4);margin-bottom:var(--space-5)}
+    .admin-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5)}
+    .admin-card-icon{font-size:2rem;margin-bottom:var(--space-2)}
+    .admin-card-value{font-size:var(--text-3xl);font-weight:800;color:var(--color-text-primary);line-height:1;font-family:var(--font-display)}
+    .admin-card-label{font-size:var(--text-xs);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:var(--space-1)}
+    .pronosticos-mini-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--space-2);margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px dashed var(--color-border)}
+    .pronostico-mini-item{background:rgba(255,255,255,.03);border-radius:var(--radius-sm);padding:var(--space-2) var(--space-3);font-size:var(--text-xs);display:flex;justify-content:space-between;align-items:center}
+    .pagination-bar{display:flex;align-items:center;justify-content:center;gap:var(--space-2);margin-top:var(--space-5);flex-wrap:wrap}
+    .pagination-btn{padding:var(--space-2) var(--space-3);background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text-secondary);font-size:var(--text-sm);font-weight:600;cursor:pointer;transition:all var(--transition-fast);min-width:36px;text-align:center}
+    .pagination-btn:hover:not(:disabled){border-color:var(--color-accent);color:var(--color-accent)}
+    .pagination-btn.active{background:var(--color-accent);border-color:var(--color-accent);color:#fff}
+    .pagination-btn:disabled{opacity:.35;cursor:not-allowed}
+    .section-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-3);margin-bottom:var(--space-4)}
+    .toolbar-left{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap}
+    .search-box{max-width:280px}
+    .toggle-sub-btn{padding:var(--space-1) var(--space-3);border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid;transition:all var(--transition-fast)}
+    .toggle-sub-btn.active-sub{background:rgba(34,197,94,.15);border-color:var(--color-success);color:var(--color-success)}
+    .toggle-sub-btn.active-sub:hover{background:rgba(239,68,68,.15);border-color:var(--color-danger,#ef4444);color:var(--color-danger,#ef4444)}
+    .toggle-sub-btn.inactive-sub{background:rgba(245,158,11,.15);border-color:var(--color-warning);color:var(--color-warning)}
+    .toggle-sub-btn.inactive-sub:hover{background:rgba(34,197,94,.15);border-color:var(--color-success);color:var(--color-success)}
+  </style>
+</head>
+<body class="bg-gradient-main">
+  <header class="app-header" role="banner">
+    <div class="container header-inner">
+      <a href="dashboard.html" class="header-logo" aria-label="Quinielas La Liga">
+        <div class="logo-icon" aria-hidden="true">⚽</div>
+        <span class="logo-text display-title">Quinielas <span>LaLiga</span></span>
+      </a>
+      <nav class="header-nav" aria-label="Navegacion principal">
+        <a href="dashboard.html" class="nav-link"><span aria-hidden="true">🎯</span> Mi Quiniela</a>
+        <a href="mis-quinielas.html" class="nav-link"><span aria-hidden="true">📋</span> Mis Quinielas</a>
+        <a href="ranking.html" class="nav-link"><span aria-hidden="true">🏆</span> Clasificacion</a>
+        <a href="admin.html" class="nav-link active" id="nav-admin" aria-current="page"><span aria-hidden="true">⚙️</span> Panel Admin</a>
+      </nav>
+      <div class="header-user">
+        <div id="user-avatar" class="user-avatar" title="Administrador" aria-label="Avatar de usuario">A</div>
+        <button id="btn-logout" class="btn btn-ghost btn-sm" aria-label="Cerrar sesion">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content" id="main-content">
+    <div class="container">
+
+      <!-- Header -->
+      <div class="glass-card animate-fadeInUp" style="padding:var(--space-6);margin-bottom:var(--space-5);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4)">
+        <div>
+          <div class="badge badge-gold" style="margin-bottom:var(--space-2)">⚙️ Panel de Administracion</div>
+          <h1 class="page-title" style="margin-bottom:var(--space-1)">Supervision & Auditoria</h1>
+          <p class="page-subtitle" style="margin-bottom:0">Vision completa de usuarios, suscripciones, quinielas y actividad.</p>
+        </div>
+        <div id="admin-name-badge" class="badge badge-gold" style="font-size:var(--text-base)">👤 Admin</div>
+      </div>
+
+      <!-- Metricas Globales -->
+      <div class="global-metrics animate-fadeInUp" style="animation-delay:.04s" id="global-metrics-row">
+        <div class="global-metric-card">
+          <div class="global-metric-icon">👥</div>
+          <div class="global-metric-info">
+            <div class="global-metric-value" id="gm-total">—</div>
+            <div class="global-metric-label">Usuarios Registrados</div>
+          </div>
+        </div>
+        <div class="global-metric-card" style="border-color:rgba(34,197,94,.3)">
+          <div class="global-metric-icon">💳</div>
+          <div class="global-metric-info">
+            <div class="global-metric-value" style="color:var(--color-success)" id="gm-suscritos">—</div>
+            <div class="global-metric-label">Suscritos Activos</div>
+          </div>
+        </div>
+        <div class="global-metric-card" style="border-color:rgba(245,158,11,.3)">
+          <div class="global-metric-icon">🚫</div>
+          <div class="global-metric-info">
+            <div class="global-metric-value" style="color:var(--color-warning)" id="gm-no-suscritos">—</div>
+            <div class="global-metric-label">Sin Suscripcion</div>
+          </div>
+        </div>
+        <div class="global-metric-card" style="border-color:rgba(230,57,70,.3)">
+          <div class="global-metric-icon">🏆</div>
+          <div class="global-metric-info">
+            <div class="global-metric-value" style="color:var(--color-accent)" id="gm-total-quinielas">—</div>
+            <div class="global-metric-label">Quinielas Historicas</div>
+          </div>
+        </div>
+        <div class="global-metric-card" style="border-color:rgba(99,102,241,.3)">
+          <div class="global-metric-icon">📅</div>
+          <div class="global-metric-info">
+            <div class="global-metric-value" style="color:#818cf8" id="gm-jornadas-abiertas">—</div>
+            <div class="global-metric-label">Jornadas Abiertas</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 Pestanas -->
+      <div class="admin-tabs" role="tablist">
+        <button class="admin-tab active" id="tab-resumen"       onclick="switchAdminTab('resumen')"       role="tab" aria-selected="true">📊 Resumen Jornada</button>
+        <button class="admin-tab"        id="tab-participantes"  onclick="switchAdminTab('participantes')"  role="tab" aria-selected="false">✅ Enviadas (<span id="count-tab-participantes">0</span>)</button>
+        <button class="admin-tab"        id="tab-pendientes"    onclick="switchAdminTab('pendientes')"    role="tab" aria-selected="false">⏳ Pendientes (<span id="count-tab-pendientes">0</span>)</button>
+        <button class="admin-tab"        id="tab-usuarios"      onclick="switchAdminTab('usuarios')"      role="tab" aria-selected="false">👥 Usuarios</button>
+        <button class="admin-tab"        id="tab-historial"     onclick="switchAdminTab('historial')"     role="tab" aria-selected="false">📋 Historial Global</button>
+      </div>
+
+      <!-- TAB: RESUMEN -->
+      <div id="view-resumen" class="animate-fadeIn">
+        <div class="glass-card" style="padding:var(--space-4) var(--space-6);margin-bottom:var(--space-5);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-3)">
+          <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">
+            <label for="select-jornada-admin" class="form-label" style="margin-bottom:0">Seleccionar Jornada:</label>
+            <select id="select-jornada-admin" class="form-select" style="width:auto;min-width:180px" onchange="onJornadaChange(this.value)"></select>
+          </div>
+          <div style="display:flex;align-items:center;gap:var(--space-2)">
+            <span style="font-size:var(--text-sm);color:var(--color-text-secondary);font-weight:600">Estado:</span>
+            <span id="jornada-estado-badge" class="badge">—</span>
+          </div>
+        </div>
+        <div class="jornada-metrics">
+          <div class="admin-card"><div class="admin-card-icon">👥</div><div class="admin-card-value" id="metric-total">0</div><div class="admin-card-label">Usuarios Totales</div></div>
+          <div class="admin-card" style="border-color:rgba(34,197,94,.3)"><div class="admin-card-icon">✅</div><div class="admin-card-value" style="color:var(--color-success)" id="metric-enviados">0</div><div class="admin-card-label">Quinielas Enviadas</div></div>
+          <div class="admin-card" style="border-color:rgba(245,158,11,.3)"><div class="admin-card-icon">⏳</div><div class="admin-card-value" style="color:var(--color-warning)" id="metric-pendientes">0</div><div class="admin-card-label">Pendientes por Jugar</div></div>
+          <div class="admin-card" style="border-color:rgba(230,57,70,.3)"><div class="admin-card-icon">📈</div><div class="admin-card-value" style="color:var(--color-accent)" id="metric-pct">0%</div><div class="admin-card-label">Participacion</div></div>
+        </div>
+        <div class="glass-card" style="padding:var(--space-4) var(--space-6);display:flex;align-items:center;justify-content:flex-end;gap:var(--space-3);flex-wrap:wrap">
+          <button id="btn-cerrar-jornada"  class="btn btn-secondary btn-sm" onclick="cambiarEstadoJornada('Cerrada')">🔒 Cerrar Jornada</button>
+          <button id="btn-abrir-jornada"   class="btn btn-secondary btn-sm" onclick="cambiarEstadoJornada('Abierta')">🟢 Abrir Jornada</button>
+          <button id="btn-calcular-puntos" class="btn btn-gold btn-sm"      onclick="ejecutarCalculoPuntos()">🧮 Calcular Puntos</button>
+        </div>
+      </div>
+
+      <!-- TAB: QUINIELAS ENVIADAS -->
+      <div id="view-participantes" class="animate-fadeIn" style="display:none">
+        <div class="section-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box"><input type="text" id="search-participantes" class="form-input" placeholder="🔍 Buscar usuario..." oninput="filterParticipantes()" /></div>
+          </div>
+        </div>
+        <div id="participantes-container"></div>
+      </div>
+
+      <!-- TAB: PENDIENTES -->
+      <div id="view-pendientes" class="animate-fadeIn" style="display:none">
+        <div class="section-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box"><input type="text" id="search-pendientes" class="form-input" placeholder="🔍 Buscar usuario..." oninput="filterPendientes()" /></div>
+          </div>
+        </div>
+        <div id="pendientes-container"></div>
+      </div>
+
+      <!-- TAB: GESTION DE USUARIOS -->
+      <div id="view-usuarios" class="animate-fadeIn" style="display:none">
+        <div class="section-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box"><input type="text" id="search-usuarios" class="form-input" placeholder="🔍 Buscar nombre o correo..." oninput="filterUsuarios()" /></div>
+            <select id="filter-suscripcion" class="form-select" style="width:auto" onchange="filterUsuarios()">
+              <option value="">Todos los estados</option>
+              <option value="activa">✅ Suscripcion Activa</option>
+              <option value="inactiva">⚠️ Sin Suscripcion</option>
+            </select>
+          </div>
+          <div style="font-size:var(--text-xs);color:var(--color-text-muted)" id="usuarios-count-label"></div>
+        </div>
+        <div id="usuarios-container"><div class="empty-state"><div class="empty-icon">⏳</div><p>Cargando usuarios...</p></div></div>
+      </div>
+
+      <!-- TAB: HISTORIAL GLOBAL -->
+      <div id="view-historial" class="animate-fadeIn" style="display:none">
+        <div class="section-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box"><input type="text" id="search-historial" class="form-input" placeholder="🔍 Buscar usuario..." oninput="onHistorialSearch()" /></div>
+            <select id="filter-jornada-historial" class="form-select" style="width:auto;min-width:160px" onchange="onHistorialJornadaChange()">
+              <option value="">Todas las jornadas</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="exportarCSV()">📥 Exportar CSV</button>
+        </div>
+        <div id="historial-container"><div class="empty-state"><div class="empty-icon">⏳</div><p>Cargando historial...</p></div></div>
+        <div id="historial-pagination" class="pagination-bar" style="display:none"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="js/api.js?v=4"></script>
+  <script src="js/auth.js?v=4"></script>
+  <script src="js/admin.js?v=4"></script>
+</body>
+</html>

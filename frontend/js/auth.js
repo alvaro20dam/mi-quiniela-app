@@ -133,7 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadUserHeader() {
   const avatarEl = document.getElementById('user-avatar');
   const userNameEl = document.getElementById('user-name');
-  if (!avatarEl && !userNameEl) return;
 
   const { data, status } = await api.get('/auth/me');
   if (status === 200 && data.nombre) {
@@ -146,7 +145,24 @@ async function loadUserHeader() {
       subBadge.textContent = data.suscripcion_activa ? '⭐ Premium' : 'Sin suscripción';
       subBadge.className = `badge ${data.suscripcion_activa ? 'badge-gold' : 'badge-warning'}`;
     }
+
+    // Si el usuario es Administrador, mostrar link a Panel Admin en la barra de navegación
+    if (data.rol === 'Administrador') {
+      const headerNav = document.querySelector('.header-nav');
+      if (headerNav && !document.getElementById('nav-admin-link')) {
+        const adminLink = document.createElement('a');
+        adminLink.href = 'admin.html';
+        adminLink.id = 'nav-admin-link';
+        const isCurrentPage = window.location.pathname.includes('admin.html');
+        adminLink.className = `nav-link ${isCurrentPage ? 'active' : ''}`;
+        adminLink.innerHTML = '<span aria-hidden="true">⚙️</span> Panel Admin';
+        headerNav.appendChild(adminLink);
+      }
+    }
+
+    return data;
   }
+  return null;
 }
 
 /** Activa/desactiva el estado de carga de un botón */
