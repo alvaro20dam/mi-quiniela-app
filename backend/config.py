@@ -24,7 +24,8 @@ class Config:
     JWT_COOKIE_HTTPONLY = True          # Mitiga XSS — JS no puede leer la cookie
     JWT_COOKIE_SAMESITE = "None" if os.environ.get("FLASK_ENV", "development") == "production" else "Lax"
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)
-    JWT_COOKIE_CSRF_PROTECT = True      # CSRF token double-submit pattern
+    # Desactivar CSRF temporalmente porque Vercel no puede leer cookies de Render
+    JWT_COOKIE_CSRF_PROTECT = False
 
     # ─── Base de Datos ───────────────────────────────────────────────────────
     DB_HOST = os.environ.get("DB_HOST", "localhost")
