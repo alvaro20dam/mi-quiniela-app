@@ -19,13 +19,22 @@ _connection_pool: ConnectionPool | None = None
 def init_db_pool(app):
     """Inicializa el pool de conexiones usando la configuración de Flask."""
     global _connection_pool
-    conninfo = (
-        f"host={app.config['DB_HOST']} "
-        f"port={app.config['DB_PORT']} "
-        f"dbname={app.config['DB_NAME']} "
-        f"user={app.config['DB_USER']} "
-        f"password={app.config['DB_PASSWORD']}"
-    )
+    
+    import os
+    database_url = os.environ.get("DATABASE_URL")
+    
+    if database_url:
+        conninfo = database_url
+    else:
+        conninfo = (
+            f"host={app.config['DB_HOST']} "
+            f"port={app.config['DB_PORT']} "
+            f"dbname={app.config['DB_NAME']} "
+            f"user={app.config['DB_USER']} "
+            f"password={app.config['DB_PASSWORD']} "
+            f"{'sslmode=require' if app.config.get('FLASK_ENV') == 'production' else ''}"
+        )
+
     _connection_pool = ConnectionPool(conninfo, min_size=1, max_size=10, open=True)
 
 
