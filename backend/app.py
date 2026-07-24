@@ -30,7 +30,8 @@ def create_app(config_class=None):
     allowed_origins = [
         r"http://localhost:\d+",
         r"http://127\.0\.0\.1:\d+",
-        r"https://.*\.vercel\.app"
+        r"https://.*\.vercel\.app",
+        r"https://.*\.onrender\.com"
     ]
     frontend_url = os.environ.get("FRONTEND_URL")
     if frontend_url:
