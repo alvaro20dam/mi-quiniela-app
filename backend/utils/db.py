@@ -25,7 +25,7 @@ def init_db_pool(app):
     
     if database_url:
         # Render external URLs sometimes require sslmode=require but don't include it in the URL
-        if "onrender.com" in database_url and "sslmode" not in database_url:
+        if "render.com" in database_url and "sslmode" not in database_url:
             if "?" in database_url:
                 database_url += "&sslmode=require"
             else:
