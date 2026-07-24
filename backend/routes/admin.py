@@ -592,6 +592,23 @@ def importar_jornada():
     except Exception as e:
         return jsonify({"error": f"Error procesando la importación: {str(e)}"}), 500
 
+@admin_bp.route("/db-test", methods=["GET"])
+def db_test():
+    import os
+    db_url = os.environ.get("DATABASE_URL", "NOT_SET")
+    # Hide password
+    import re
+    safe_url = re.sub(r":([^:@]+)@", ":XXXXX@", db_url) if db_url != "NOT_SET" else db_url
+    
+    try:
+        import psycopg
+        # Intentar conexión directa con timeout corto
+        conn = psycopg.connect(db_url, connect_timeout=3)
+        conn.close()
+        return jsonify({"status": "SUCCESS", "url": safe_url})
+    except Exception as e:
+        return jsonify({"status": "ERROR", "url": safe_url, "error": str(e)})
+
 @admin_bp.route("/jornada/actualizar-resultados", methods=["POST"])
 @jwt_required()
 def actualizar_resultados():
