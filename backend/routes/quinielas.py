@@ -44,6 +44,11 @@ def submit_quiniela():
     current_user_id = get_jwt_identity()
     claims = get_jwt()
 
+    if claims.get("rol") == "Administrador":
+        return jsonify({
+            "error": "Acceso denegado. Los administradores no participan en las quinielas."
+        }), 403
+
     # ── Validación 1: Suscripción activa (del JWT claim + verificación en BD) ─
     suscripcion_activa_claim = claims.get("suscripcion_activa", False)
     if not suscripcion_activa_claim:

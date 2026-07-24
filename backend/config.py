@@ -36,6 +36,9 @@ class Config:
     # ─── bcrypt ──────────────────────────────────────────────────────────────
     BCRYPT_ROUNDS = 12  # Factor de coste para bcrypt salted hash (OWASP recomienda ≥12)
 
+    # ─── External APIs ───────────────────────────────────────────────────────
+    FOOTBALL_API_TOKEN = os.environ.get("FOOTBALL_API_TOKEN", "")
+
 
 class DevelopmentConfig(Config):
     DEBUG = True

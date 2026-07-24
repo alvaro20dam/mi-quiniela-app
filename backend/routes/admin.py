@@ -11,6 +11,9 @@ Endpoints:
 import math
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt
+from flask import current_app
+import requests
+from datetime import datetime, timezone
 from utils.db import query
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
@@ -188,6 +191,45 @@ def cambiar_estado_jornada():
     )
 
     return jsonify({"message": f"Estado de la jornada actualizado a '{nuevo_estado}'."}), 200
+
+@admin_bp.route("/jornada/<int:jornada_id>", methods=["DELETE"])
+@jwt_required()
+def eliminar_jornada(jornada_id):
+    """
+    DELETE /api/admin/jornada/<id>
+    Permite al administrador eliminar una jornada y toda su información en cascada.
+    """
+    if not _require_admin():
+        return jsonify({"error": "Acceso denegado. Se requieren permisos de Administrador."}), 403
+
+    jornada = query("SELECT id, numero_jornada FROM jornadas WHERE id = %s", (jornada_id,), fetchone=True)
+    if not jornada:
+        return jsonify({"error": "La jornada no existe."}), 404
+
+    try:
+        # PostgreSQL CASCADE se encargará de borrar partidos, quinielas y pronósticos,
+        # pero como no tenemos ON DELETE CASCADE configurado en el schema original,
+        # lo borramos manualmente en orden inverso para asegurar integridad referencial.
+        
+        # Eliminar pronósticos_detalle (via quiniela_id o partido_id)
+        query(
+            "DELETE FROM pronosticos_detalle WHERE partido_id IN (SELECT id FROM partidos WHERE jornada_id = %s)",
+            (jornada_id,)
+        )
+        
+        # Eliminar quinielas
+        query("DELETE FROM quinielas WHERE jornada_id = %s", (jornada_id,))
+        
+        # Eliminar partidos
+        query("DELETE FROM partidos WHERE jornada_id = %s", (jornada_id,))
+        
+        # Eliminar jornada
+        query("DELETE FROM jornadas WHERE id = %s", (jornada_id,))
+
+        return jsonify({"message": f"Jornada {jornada[1]} eliminada con éxito."}), 200
+    except Exception as e:
+        return jsonify({"error": f"Error eliminando la jornada: {str(e)}"}), 500
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -474,3 +516,147 @@ def toggle_suscripcion():
         "usuario_id": usuario_id,
         "estado_suscripcion": nuevo_estado
     }), 200
+
+@admin_bp.route("/jornada/importar", methods=["POST"])
+@jwt_required()
+def importar_jornada():
+    """
+    POST /api/admin/jornada/importar
+    Body: { "numero_jornada": 4 }
+    Importa los partidos de la jornada desde football-data.org (La Liga - PD).
+    """
+    if not _require_admin():
+        return jsonify({"error": "Acceso denegado."}), 403
+
+    data = request.get_json(silent=True) or {}
+    numero_jornada = data.get("numero_jornada")
+
+    if not numero_jornada:
+        return jsonify({"error": "Parámetro 'numero_jornada' es requerido."}), 400
+
+    api_token = current_app.config.get("FOOTBALL_API_TOKEN")
+    if not api_token:
+        return jsonify({"error": "FOOTBALL_API_TOKEN no está configurado en el backend."}), 500
+
+    # Lógica para football-data.org (La Liga = PD, id = 2014)
+    # Ejemplo de URL: https://api.football-data.org/v4/competitions/PD/matches?matchday=4
+    url = f"https://api.football-data.org/v4/competitions/PD/matches?matchday={numero_jornada}"
+    headers = {"X-Auth-Token": api_token}
+
+    try:
+        resp = requests.get(url, headers=headers)
+        if resp.status_code != 200:
+            return jsonify({"error": f"Error de la API externa: {resp.status_code} - {resp.text}"}), 502
+        
+        matches_data = resp.json()
+        matches = matches_data.get("matches", [])
+        
+        if not matches:
+            return jsonify({"error": f"No se encontraron partidos para la jornada {numero_jornada}."}), 404
+        
+        # Verificar si la jornada ya existe
+        existing = query("SELECT id FROM jornadas WHERE numero_jornada = %s", (numero_jornada,), fetchone=True)
+        if existing:
+            return jsonify({"error": f"La jornada {numero_jornada} ya existe en la base de datos."}), 409
+        
+        # Tomar la fecha del primer partido como límite de envío
+        # Parse dates (ISO 8601 string)
+        first_match_utc = min([datetime.fromisoformat(m["utcDate"].replace("Z", "+00:00")) for m in matches])
+        
+        # Insertar jornada
+        jornada_id_row = query(
+            "INSERT INTO jornadas (numero_jornada, fecha_limite_envio, estado) VALUES (%s, %s, 'Abierta') RETURNING id",
+            (numero_jornada, first_match_utc),
+            fetchone=True
+        )
+        jornada_id = jornada_id_row[0]
+        
+        # Insertar partidos
+        for m in matches:
+            equipo_local = m["homeTeam"]["name"]
+            equipo_visitante = m["awayTeam"]["name"]
+            fecha_partido = datetime.fromisoformat(m["utcDate"].replace("Z", "+00:00"))
+            
+            # Limpiar algunos nombres comunes si es necesario, o guardarlos tal cual provee la API
+            # La API usa por ejemplo "Real Madrid CF", "FC Barcelona". Los guardamos tal cual por simplicidad.
+            
+            query(
+                "INSERT INTO partidos (jornada_id, equipo_local, equipo_visitante, fecha_partido, estado) VALUES (%s, %s, %s, %s, 'Programado')",
+                (jornada_id, equipo_local, equipo_visitante, fecha_partido)
+            )
+            
+        return jsonify({
+            "message": f"Jornada {numero_jornada} importada con {len(matches)} partidos exitosamente."
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": f"Error procesando la importación: {str(e)}"}), 500
+
+@admin_bp.route("/jornada/actualizar-resultados", methods=["POST"])
+@jwt_required()
+def actualizar_resultados():
+    """
+    POST /api/admin/jornada/actualizar-resultados
+    Body: { "jornada_id": 1 }
+    Consulta la API y actualiza los marcadores reales de los partidos finalizados.
+    """
+    if not _require_admin():
+        return jsonify({"error": "Acceso denegado."}), 403
+
+    data = request.get_json(silent=True) or {}
+    jornada_id = data.get("jornada_id")
+
+    if not jornada_id:
+        return jsonify({"error": "Parámetro 'jornada_id' es requerido."}), 400
+
+    jornada = query("SELECT numero_jornada FROM jornadas WHERE id = %s", (jornada_id,), fetchone=True)
+    if not jornada:
+        return jsonify({"error": "La jornada especificada no existe."}), 404
+        
+    numero_jornada = jornada[0]
+
+    api_token = current_app.config.get("FOOTBALL_API_TOKEN")
+    if not api_token:
+        return jsonify({"error": "FOOTBALL_API_TOKEN no está configurado en el backend."}), 500
+
+    url = f"https://api.football-data.org/v4/competitions/PD/matches?matchday={numero_jornada}"
+    headers = {"X-Auth-Token": api_token}
+
+    try:
+        resp = requests.get(url, headers=headers)
+        if resp.status_code != 200:
+            return jsonify({"error": f"Error de la API externa: {resp.status_code} - {resp.text}"}), 502
+        
+        matches_data = resp.json()
+        matches = matches_data.get("matches", [])
+        
+        if not matches:
+            return jsonify({"error": f"No se encontraron partidos en la API para la jornada {numero_jornada}."}), 404
+            
+        actualizados = 0
+        for m in matches:
+            if m.get("status") == "FINISHED":
+                equipo_local = m["homeTeam"]["name"]
+                
+                # Manejar posibles nulos si la API no tiene los goles a pesar de estar FINISHED
+                score = m.get("score", {}).get("fullTime", {})
+                goles_local = score.get("home")
+                goles_visitante = score.get("away")
+                
+                if goles_local is not None and goles_visitante is not None:
+                    query(
+                        """
+                        UPDATE partidos 
+                        SET estado = 'Finalizado', goles_local_real = %s, goles_visitante_real = %s 
+                        WHERE jornada_id = %s AND equipo_local = %s
+                        """,
+                        (goles_local, goles_visitante, jornada_id, equipo_local)
+                    )
+                    actualizados += 1
+                    
+        return jsonify({
+            "message": f"Se sincronizaron los resultados. Partidos finalizados y actualizados: {actualizados}."
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Error procesando la actualización: {str(e)}"}), 500

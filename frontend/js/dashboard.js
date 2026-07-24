@@ -18,6 +18,7 @@ const state = {
   pronosticos: {}, // { partido_id: { goles_local: 0, goles_visitante: 0 } }
   jornadaLocked: false,
   allJornadas: [],  // Lista completa de jornadas para el carrusel
+  user: null, // Datos del usuario autenticado
 };
 
 // Emojis de equipos de La Liga (mapa visual)
@@ -38,7 +39,7 @@ const TEAM_EMOJIS = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadUserHeader();
+  state.user = await loadUserHeader();
   await loadAllJornadas();   // Cargar lista de jornadas para el carrusel
   await loadJornada();       // Cargar la jornada actual (abierta)
   setupLogout();
@@ -153,7 +154,20 @@ async function renderJornadaData(jornada, partidos) {
 
   state.jornada   = jornada;
   state.partidos  = partidos;
-  state.jornadaLocked = jornada.estado !== 'Abierta';
+  state.jornadaLocked = jornada.estado !== 'Abierta' || (state.user && state.user.rol === 'Administrador');
+
+  // Si es admin, mostrar mensaje
+  if (state.user && state.user.rol === 'Administrador') {
+      const jornadaHeader = document.getElementById('jornada-header');
+      if (jornadaHeader && !document.getElementById('admin-read-only-msg')) {
+          const msg = document.createElement('div');
+          msg.id = 'admin-read-only-msg';
+          msg.className = 'alert alert-info';
+          msg.style.marginTop = '1rem';
+          msg.innerHTML = '<strong>Modo Auditoría:</strong> Los administradores no participan en las quinielas. Visualización de solo lectura.';
+          jornadaHeader.parentNode.insertBefore(msg, jornadaHeader.nextSibling);
+      }
+  }
 
   // Resetear pronósticos
   state.pronosticos = {};

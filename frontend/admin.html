@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -57,7 +57,6 @@
         <a href="dashboard.html" class="nav-link"><span aria-hidden="true">🎯</span> Mi Quiniela</a>
         <a href="mis-quinielas.html" class="nav-link"><span aria-hidden="true">📋</span> Mis Quinielas</a>
         <a href="ranking.html" class="nav-link"><span aria-hidden="true">🏆</span> Clasificacion</a>
-        <a href="admin.html" class="nav-link active" id="nav-admin" aria-current="page"><span aria-hidden="true">⚙️</span> Panel Admin</a>
       </nav>
       <div class="header-user">
         <div id="user-avatar" class="user-avatar" title="Administrador" aria-label="Avatar de usuario">A</div>
@@ -129,6 +128,19 @@
 
       <!-- TAB: RESUMEN -->
       <div id="view-resumen" class="animate-fadeIn">
+        
+        <!-- Gestión de Jornadas Nuejas -->
+        <div class="glass-card" style="padding:var(--space-4) var(--space-6);margin-bottom:var(--space-4);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-3);border:1px solid rgba(245,158,11,0.3)">
+          <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">
+            <span style="font-weight:600;color:var(--color-warning);">🚀 Importar Nueva Jornada:</span>
+            <input type="number" id="input-import-jornada" class="form-input" style="width:100px" placeholder="N°" min="1" max="38">
+            <button id="btn-import-jornada" class="btn btn-primary btn-sm" onclick="importarJornada()">Descargar Partidos</button>
+          </div>
+          <div style="font-size:var(--text-xs);color:var(--color-text-muted);">
+            Se conectará a football-data.org para La Liga.
+          </div>
+        </div>
+
         <div class="glass-card" style="padding:var(--space-4) var(--space-6);margin-bottom:var(--space-5);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-3)">
           <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">
             <label for="select-jornada-admin" class="form-label" style="margin-bottom:0">Seleccionar Jornada:</label>
@@ -145,10 +157,23 @@
           <div class="admin-card" style="border-color:rgba(245,158,11,.3)"><div class="admin-card-icon">⏳</div><div class="admin-card-value" style="color:var(--color-warning)" id="metric-pendientes">0</div><div class="admin-card-label">Pendientes por Jugar</div></div>
           <div class="admin-card" style="border-color:rgba(230,57,70,.3)"><div class="admin-card-icon">📈</div><div class="admin-card-value" style="color:var(--color-accent)" id="metric-pct">0%</div><div class="admin-card-label">Participacion</div></div>
         </div>
-        <div class="glass-card" style="padding:var(--space-4) var(--space-6);display:flex;align-items:center;justify-content:flex-end;gap:var(--space-3);flex-wrap:wrap">
+        <div class="glass-card" style="padding:var(--space-4) var(--space-6);margin-bottom:var(--space-5);display:flex;align-items:center;justify-content:flex-end;gap:var(--space-3);flex-wrap:wrap">
           <button id="btn-cerrar-jornada"  class="btn btn-secondary btn-sm" onclick="cambiarEstadoJornada('Cerrada')">🔒 Cerrar Jornada</button>
           <button id="btn-abrir-jornada"   class="btn btn-secondary btn-sm" onclick="cambiarEstadoJornada('Abierta')">🟢 Abrir Jornada</button>
           <button id="btn-calcular-puntos" class="btn btn-gold btn-sm"      onclick="ejecutarCalculoPuntos()">🧮 Calcular Puntos</button>
+          <button id="btn-eliminar-jornada" class="btn btn-sm" style="background:var(--color-danger, #ef4444);color:white;border:none;" onclick="eliminarJornada()">🗑️ Eliminar Jornada</button>
+        </div>
+
+        <div class="glass-card" style="padding:var(--space-4) var(--space-6);margin-bottom:var(--space-5);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3);flex-wrap:wrap;gap:var(--space-2)">
+            <h3 style="font-size:var(--text-lg);font-weight:700;display:flex;align-items:center;gap:var(--space-2)">
+              <span>🏟️</span> Resultados Reales de la Jornada
+            </h3>
+            <button class="btn btn-secondary btn-sm" onclick="actualizarResultadosAPI()">🔄 Sincronizar desde API</button>
+          </div>
+          <div id="partidos-reales-container" style="display:flex;flex-direction:column;gap:var(--space-2)">
+            <div class="empty-state" style="padding:var(--space-4) 0"><div class="empty-icon">⚽</div><p>Cargando partidos...</p></div>
+          </div>
         </div>
       </div>
 

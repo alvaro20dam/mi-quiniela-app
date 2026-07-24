@@ -149,10 +149,10 @@ async function loadUserHeader() {
     // Si el usuario es Administrador, mostrar link a Panel Admin en la barra de navegación
     if (data.rol === 'Administrador') {
       const headerNav = document.querySelector('.header-nav');
-      if (headerNav && !document.getElementById('nav-admin-link')) {
+      if (headerNav && !document.getElementById('nav-admin')) {
         const adminLink = document.createElement('a');
         adminLink.href = 'admin.html';
-        adminLink.id = 'nav-admin-link';
+        adminLink.id = 'nav-admin';
         const isCurrentPage = window.location.pathname.includes('admin.html');
         adminLink.className = `nav-link ${isCurrentPage ? 'active' : ''}`;
         adminLink.innerHTML = '<span aria-hidden="true">⚙️</span> Panel Admin';

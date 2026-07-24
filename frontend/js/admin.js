@@ -143,6 +143,7 @@ async function loadAdminData() {
 
   renderMetrics(data.metricas);
   renderJornadaEstado(data.jornada.estado);
+  renderPartidosRealesContainer(data.partidos || []);
   renderParticipantesContainer(data.participantes || []);
   renderPendientesContainer(data.pendientes || []);
 }
@@ -154,6 +155,38 @@ function renderMetrics(m) {
   setText('metric-pct',        `${m.porcentaje_participacion || 0}%`);
   setText('count-tab-participantes', m.total_enviados || 0);
   setText('count-tab-pendientes',    m.total_pendientes || 0);
+}
+
+function renderPartidosRealesContainer(partidos) {
+  const container = document.getElementById('partidos-reales-container');
+  if (!container) return;
+
+  if (!partidos || partidos.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚽</div><p>No hay partidos registrados para esta jornada.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = partidos.map(p => {
+    const isFinalizado = p.estado === 'Finalizado';
+    const golesLocal = p.goles_local_real !== null ? p.goles_local_real : '-';
+    const golesVisita = p.goles_visitante_real !== null ? p.goles_visitante_real : '-';
+    const badgeColor = isFinalizado ? 'var(--color-success)' : 'var(--color-warning)';
+    
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-border);font-size:var(--text-sm)">
+        <div style="flex:1;text-align:right;font-weight:600">${p.equipo_local}</div>
+        <div style="margin:0 var(--space-4);display:flex;align-items:center;gap:var(--space-2)">
+          <span style="font-weight:800;font-size:var(--text-base);background:var(--color-bg-dark);padding:4px 12px;border-radius:4px">${golesLocal}</span>
+          <span style="color:var(--color-text-muted)">-</span>
+          <span style="font-weight:800;font-size:var(--text-base);background:var(--color-bg-dark);padding:4px 12px;border-radius:4px">${golesVisita}</span>
+        </div>
+        <div style="flex:1;text-align:left;font-weight:600">${p.equipo_visitante}</div>
+        <div style="margin-left:var(--space-3)">
+          <span style="font-size:10px;padding:2px 8px;border-radius:12px;border:1px solid ${badgeColor};color:${badgeColor}">${p.estado}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 function renderJornadaEstado(estado) {
@@ -515,8 +548,52 @@ function switchAdminTab(tabName) {
 // ────────────────────────────────────────────────────────────────────────────
 // BLOQUE 9: CONTROL DE JORNADA
 // ────────────────────────────────────────────────────────────────────────────
+async function importarJornada() {
+  const inputNum = document.getElementById('input-import-jornada');
+  const btn = document.getElementById('btn-import-jornada');
+  const numero = parseInt(inputNum.value);
+
+  if (!numero || isNaN(numero) || numero < 1 || numero > 38) {
+    showToast('Por favor, ingresa un número de jornada válido (1-38).', 'error');
+    return;
+  }
+
+  // Prevenir dobles clics
+  btn.disabled = true;
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Descargando...';
+
+  try {
+    const { data, status } = await api.post('/admin/jornada/importar', {
+      numero_jornada: numero
+    });
+
+    if (status === 201) {
+      showToast(data.message, 'success');
+      inputNum.value = '';
+      await loadJornadasSelector();
+      if (adminState.allJornadas.length > 0) {
+        adminState.currentJornadaId = adminState.allJornadas[0].id;
+        document.getElementById('select-jornada-admin').value = adminState.currentJornadaId;
+        await loadAdminData();
+      }
+    } else {
+      showToast(data?.error || 'Error al importar jornada.', 'error');
+    }
+  } catch (error) {
+    showToast('Error de conexión al importar.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+}
+
 async function cambiarEstadoJornada(nuevoEstado) {
   if (!adminState.currentJornadaId) return;
+
+  const confirmar = window.confirm(`¿Estás seguro de que deseas cambiar el estado de la jornada a "${nuevoEstado}"?`);
+  if (!confirmar) return;
+
   const { data, status } = await api.post('/admin/jornada/estado', {
     jornada_id: adminState.currentJornadaId,
     estado: nuevoEstado
@@ -532,6 +609,10 @@ async function cambiarEstadoJornada(nuevoEstado) {
 
 async function ejecutarCalculoPuntos() {
   if (!adminState.currentJornadaId) return;
+
+  const confirmar = window.confirm('¿Estás seguro de que deseas calcular los puntos? Esto es irreversible.');
+  if (!confirmar) return;
+
   const { data, status } = await api.post(`/quinielas/calcular/${adminState.currentJornadaId}`, {});
   if (status === 200) {
     showToast(data?.message || 'Calculo ejecutado.', 'success');
@@ -542,6 +623,56 @@ async function ejecutarCalculoPuntos() {
   }
 }
 
+async function eliminarJornada() {
+  if (!adminState.currentJornadaId) return;
+
+  const confirmar = window.confirm('⚠️ ¡ADVERTENCIA! ¿Estás completamente seguro de eliminar esta jornada? Se borrarán todos los partidos, y las quinielas asociadas.');
+  if (!confirmar) return;
+
+  const { data, status } = await api.delete(`/admin/jornada/${adminState.currentJornadaId}`);
+  
+  if (status === 200) {
+    showToast(data?.message || 'Jornada eliminada exitosamente.', 'success');
+    await loadJornadasSelector();
+    if (adminState.allJornadas.length > 0) {
+      adminState.currentJornadaId = adminState.allJornadas[0].id;
+      document.getElementById('select-jornada-admin').value = adminState.currentJornadaId;
+      await loadAdminData();
+    } else {
+      adminState.currentJornadaId = null;
+      document.getElementById('select-jornada-admin').innerHTML = '';
+      document.getElementById('participantes-container').innerHTML = '';
+      document.getElementById('pendientes-container').innerHTML = '';
+      renderMetrics({total_usuarios: 0, total_enviados: 0, total_pendientes: 0, porcentaje_participacion: 0});
+      renderJornadaEstado('—');
+    }
+  } else {
+    showToast(data?.error || 'Error al eliminar la jornada.', 'error');
+  }
+}
+
+async function actualizarResultadosAPI() {
+  if (!adminState.currentJornadaId) return;
+
+  const btn = document.querySelector('button[onclick="actualizarResultadosAPI()"]');
+  if (btn) btn.disabled = true;
+
+  showToast('Consultando API de resultados...', 'info');
+
+  const { data, status } = await api.post('/admin/jornada/actualizar-resultados', {
+    jornada_id: adminState.currentJornadaId
+  });
+
+  if (status === 200) {
+    showToast(data?.message || 'Resultados sincronizados exitosamente.', 'success');
+    await loadAdminData();
+  } else {
+    showToast(data?.error || 'Error al sincronizar resultados.', 'error');
+  }
+
+  if (btn) btn.disabled = false;
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // BLOQUE 10: TOGGLE PRONOSTICOS
 // ────────────────────────────────────────────────────────────────────────────
@@ -549,3 +680,10 @@ function togglePronosticos(elemId) {
   const el = document.getElementById(elemId);
   if (el) el.style.display = el.style.display === 'none' ? 'grid' : 'none';
 }
+
+// Exponer funciones al window
+window.importarJornada = importarJornada;
+window.cambiarEstadoJornada = cambiarEstadoJornada;
+window.ejecutarCalculoPuntos = ejecutarCalculoPuntos;
+window.eliminarJornada = eliminarJornada;
+window.actualizarResultadosAPI = actualizarResultadosAPI;
