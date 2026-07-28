@@ -3,7 +3,15 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadUserHeader();
+  document.body.style.visibility = 'hidden';
+
+  const user = await loadUserHeader();
+  if (!user) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  document.body.style.visibility = 'visible';
   await loadRanking();
   setupMobileMenu();
   setupLogout();
@@ -51,12 +59,24 @@ async function loadRanking(jornadaId = null) {
   const meRes = await api.get('/auth/me');
   const myEmail = meRes.data?.email || null;
   let myPosition = '—';
+  let myPoints = '—';
+  let totalPoints = 0;
+  let maxPoints = 0;
 
   tbody.innerHTML = '';
   data.ranking.forEach((entry, idx) => {
     const isMe = entry.email === myEmail;
     const medal = getMedal(entry.posicion);
-    if (isMe) myPosition = entry.posicion;
+    
+    totalPoints += entry.puntos_totales;
+    if (entry.puntos_totales > maxPoints) {
+      maxPoints = entry.puntos_totales;
+    }
+
+    if (isMe) {
+      myPosition = entry.posicion;
+      myPoints = entry.puntos_totales;
+    }
 
     const row = document.createElement('tr');
     row.className = `rank-${entry.posicion} ${isMe ? 'my-row' : ''} animate-fadeInUp`;
@@ -93,6 +113,20 @@ async function loadRanking(jornadaId = null) {
   });
 
   if (myRankEl) myRankEl.textContent = myPosition !== '—' ? `#${myPosition}` : '—';
+
+  // Actualizar tarjetas estadísticas
+  const numParticipantes = data.ranking.length;
+  const avgPoints = numParticipantes > 0 ? (totalPoints / numParticipantes).toFixed(1) : 0;
+
+  const statParticipantesEl = document.getElementById('stat-participantes');
+  const statMaxPtsEl = document.getElementById('stat-max-pts');
+  const statAvgPtsEl = document.getElementById('stat-avg-pts');
+  const statMyPtsEl = document.getElementById('stat-my-pts');
+
+  if (statParticipantesEl) statParticipantesEl.textContent = numParticipantes;
+  if (statMaxPtsEl) statMaxPtsEl.textContent = maxPoints;
+  if (statAvgPtsEl) statAvgPtsEl.textContent = avgPoints;
+  if (statMyPtsEl) statMyPtsEl.textContent = myPoints;
 }
 
 function getMedal(position) {

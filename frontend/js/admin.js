@@ -505,17 +505,18 @@ function onHistorialJornadaChange() {
 }
 
 async function exportarCSV() {
-  const token = localStorage.getItem('access_token');
-  if (!token) { showToast('Debes iniciar sesion.', 'error'); return; }
-
   const params = new URLSearchParams();
   if (adminState.historialJornadaFilter) params.set('jornada_id', adminState.historialJornadaFilter);
   if (adminState.historialSearch)        params.set('search', adminState.historialSearch);
 
   try {
-    const resp = await fetch(`http://localhost:5000/api/admin/historial/csv?${params}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+    const url = `${API_BASE}/admin/historial/csv?${params}`;
+    const resp = await fetch(url, {
+      method: 'GET',
+      credentials: 'include'
     });
+    
+    if (resp.status === 401) { showToast('Debes iniciar sesion.', 'error'); return; }
     if (!resp.ok) { showToast('Error al exportar CSV.', 'error'); return; }
 
     const blob = await resp.blob();
@@ -525,7 +526,8 @@ async function exportarCSV() {
     link.click();
     URL.revokeObjectURL(link.href);
     showToast('CSV descargado exitosamente.', 'success');
-  } catch {
+  } catch (err) {
+    console.error(err);
     showToast('Error de conexion al exportar.', 'error');
   }
 }

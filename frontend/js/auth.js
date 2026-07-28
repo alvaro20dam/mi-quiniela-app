@@ -72,14 +72,32 @@ document.addEventListener('DOMContentLoaded', () => {
       const password2 = document.getElementById('reg-password2').value;
 
       // Validación frontend (la validación real está en el backend)
-      if (password !== password2) {
-        showAlert('register-alert', 'Las contraseñas no coinciden.', 'error');
+      if (!nombre) {
+        showAlert('register-alert', 'Por favor ingresa tu nombre completo.', 'error');
+        setLoading(btn, false);
+        return;
+      }
+
+      if (!email) {
+        showAlert('register-alert', 'Por favor ingresa tu correo electrónico.', 'error');
+        setLoading(btn, false);
+        return;
+      }
+
+      if (!password) {
+        showAlert('register-alert', 'Por favor ingresa una contraseña.', 'error');
         setLoading(btn, false);
         return;
       }
 
       if (password.length < 8) {
         showAlert('register-alert', 'La contraseña debe tener al menos 8 caracteres.', 'error');
+        setLoading(btn, false);
+        return;
+      }
+
+      if (password !== password2) {
+        showAlert('register-alert', 'Las contraseñas no coinciden.', 'error');
         setLoading(btn, false);
         return;
       }

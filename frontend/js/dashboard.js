@@ -16,9 +16,10 @@ const state = {
   jornada: null,
   partidos: [],
   pronosticos: {}, // { partido_id: { goles_local: 0, goles_visitante: 0 } }
+  tocados: new Set(), // IDs de partidos que el usuario tocó explícitamente
   jornadaLocked: false,
-  allJornadas: [],  // Lista completa de jornadas para el carrusel
-  user: null, // Datos del usuario autenticado
+  allJornadas: [],
+  user: null,
 };
 
 // Emojis de equipos de La Liga (mapa visual)
@@ -39,7 +40,19 @@ const TEAM_EMOJIS = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Guard de autenticación: ocultar la página hasta verificar que hay sesión
+  document.body.style.visibility = 'hidden';
+
   state.user = await loadUserHeader();
+
+  if (!state.user) {
+    // Sin sesión válida → redirigir al login inmediatamente (sin mostrar nada)
+    window.location.href = 'index.html';
+    return;
+  }
+
+  // Sesión confirmada → mostrar la página y cargar datos
+  document.body.style.visibility = 'visible';
   await loadAllJornadas();   // Cargar lista de jornadas para el carrusel
   await loadJornada();       // Cargar la jornada actual (abierta)
   setupLogout();
@@ -154,7 +167,9 @@ async function renderJornadaData(jornada, partidos) {
 
   state.jornada   = jornada;
   state.partidos  = partidos;
-  state.jornadaLocked = jornada.estado !== 'Abierta' || (state.user && state.user.rol === 'Administrador');
+  state.jornadaLocked = jornada.estado !== 'Abierta' || 
+                        (state.user && state.user.rol === 'Administrador') ||
+                        (state.user && state.user.rol === 'Cliente' && !state.user.suscripcion_activa);
 
   // Si es admin, mostrar mensaje
   if (state.user && state.user.rol === 'Administrador') {
@@ -169,8 +184,22 @@ async function renderJornadaData(jornada, partidos) {
       }
   }
 
-  // Resetear pronósticos
+  // Si es cliente sin suscripción activa, mostrar cartel amarillo
+  if (state.user && state.user.rol === 'Cliente' && !state.user.suscripcion_activa) {
+      const jornadaHeader = document.getElementById('jornada-header');
+      if (jornadaHeader && !document.getElementById('inactive-sub-msg')) {
+          const msg = document.createElement('div');
+          msg.id = 'inactive-sub-msg';
+          msg.className = 'alert alert-warning';
+          msg.style.marginTop = '1rem';
+          msg.innerHTML = '<strong>⚠️ Suscripción Inactiva:</strong> No puedes enviar pronósticos. Por favor, contacta con el supervisor o administrador para activar tu suscripción.';
+          jornadaHeader.parentNode.insertBefore(msg, jornadaHeader.nextSibling);
+      }
+  }
+
+  // Resetear pronósticos y registro de partidos tocados
   state.pronosticos = {};
+  state.tocados = new Set();
   partidos.forEach(p => {
     state.pronosticos[p.id] = { goles_local: 0, goles_visitante: 0 };
   });
@@ -264,9 +293,12 @@ function getTendency(gLocal, gVisitante) {
 function renderMatchCard(partido, locked = false) {
   const localEmoji = TEAM_EMOJIS[partido.equipo_local] || '⚽';
   const visEmoji   = TEAM_EMOJIS[partido.equipo_visitante] || '⚽';
-  const dateStr    = new Date(partido.fecha_partido).toLocaleDateString('es-ES', {
-    weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-  });
+  // La API devuelve fechas en UTC. new Date() las convierte automáticamente a la hora local del navegador.
+  const matchDate  = new Date(partido.fecha_partido);
+  const datePart   = matchDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+  const timePart   = matchDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  const tzPart     = matchDate.toLocaleDateString('es-ES', { timeZoneName: 'short' }).split(',').pop().trim();
+  const dateStr    = `${datePart}, ${timePart}<br><span style="font-size:0.7em;opacity:0.65">${tzPart}</span>`;
 
   const lockedAttr  = locked ? 'disabled aria-disabled="true"' : '';
   const lockedBadge = locked ? '<span class="locked-badge">🔒 Cerrado</span>' : '';
@@ -383,6 +415,9 @@ function attachScoreListeners() {
         }, 50);
       }
 
+      // Marcar partido como tocado por el usuario
+      state.tocados.add(partidoId);
+
       // Actualizar tendencia
       updateTendency(partidoId);
       updateSubmitProgress();
@@ -421,6 +456,7 @@ async function loadExistingQuiniela(jornadaId, readOnly = false) {
     // Actualizar estado
     if (state.pronosticos[partido_id] !== undefined) {
       state.pronosticos[partido_id] = { goles_local, goles_visitante };
+      state.tocados.add(partido_id); // Marcar como tocado porque ya tiene un valor de la BD
     }
 
     // Actualizar UI
@@ -452,6 +488,46 @@ async function loadExistingQuiniela(jornadaId, readOnly = false) {
 async function submitQuiniela() {
   if (!state.jornada || state.jornadaLocked) return;
 
+  // Detectar partidos no tocados
+  const noTocados = state.partidos.filter(p => !state.tocados.has(p.id));
+
+  // Construir resumen para el modal
+  const resumen = state.partidos.map(p => {
+    const prog = state.pronosticos[p.id];
+    const tocado = state.tocados.has(p.id);
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;
+                  padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.07);
+                  ${!tocado ? 'opacity:0.5' : ''}">
+        <span style="font-size:0.82rem">
+          ${!tocado ? '⚠️ ' : ''}${p.equipo_local} vs ${p.equipo_visitante}
+        </span>
+        <span style="font-family:var(--font-display);font-size:1rem;color:var(--color-gold);min-width:50px;text-align:right">
+          ${prog.goles_local} – ${prog.goles_visitante}
+        </span>
+      </div>`;
+  }).join('');
+
+  const advertencia = noTocados.length > 0
+    ? `<div style="background:rgba(255,165,0,0.12);border:1px solid rgba(255,165,0,0.3);
+                  border-radius:0.5rem;padding:0.6rem 0.8rem;margin-bottom:0.8rem;
+                  font-size:0.8rem;color:#ffb347">
+        ⚠️ <strong>${noTocados.length} partido(s)</strong> no fueron tocados y quedarán con <strong>0 – 0</strong>.
+       </div>`
+    : '';
+
+  // Mostrar modal de confirmación
+  const confirmado = await showConfirmModal(
+    '¿Confirmar Quiniela?',
+    `${advertencia}
+     <div style="max-height:260px;overflow-y:auto;margin-top:0.5rem">${resumen}</div>
+     <p style="margin-top:0.8rem;font-size:0.8rem;color:var(--color-text-muted)">
+       Revisa tus pronósticos antes de enviar.
+     </p>`
+  );
+
+  if (!confirmado) return;
+
   const btn = document.getElementById('btn-submit-quiniela');
   setLoading(btn, true);
 
@@ -472,7 +548,6 @@ async function submitQuiniela() {
 
   if (status === 200 || status === 201) {
     showToast(`🎯 ${data.message}`, 'success', 5000);
-    // Feedback visual en todas las cards
     document.querySelectorAll('.match-card').forEach(card => {
       card.style.borderColor = 'var(--color-success)';
       setTimeout(() => { card.style.borderColor = ''; }, 2000);
@@ -485,6 +560,45 @@ async function submitQuiniela() {
   } else {
     showToast('❌ ' + (data?.error || 'Error al enviar la quiniela.'), 'error');
   }
+}
+
+// ─── Modal de Confirmación ───────────────────────────────────
+function showConfirmModal(titulo, htmlContenido) {
+  return new Promise(resolve => {
+    // Eliminar modal previo si existe
+    document.getElementById('confirm-modal-overlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'confirm-modal-overlay';
+    overlay.style.cssText = `
+      position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;
+      display:flex;align-items:center;justify-content:center;padding:1rem;
+      animation:fadeIn 0.15s ease;
+    `;
+
+    overlay.innerHTML = `
+      <div style="background:var(--color-surface,#1e1e2e);border:1px solid rgba(255,255,255,0.12);
+                  border-radius:1rem;padding:1.5rem;max-width:480px;width:100%;
+                  box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+        <h3 style="margin:0 0 1rem;font-size:1.1rem">${titulo}</h3>
+        <div>${htmlContenido}</div>
+        <div style="display:flex;gap:0.75rem;margin-top:1.25rem;justify-content:flex-end">
+          <button id="modal-cancel" style="padding:0.5rem 1.2rem;border-radius:0.5rem;
+            border:1px solid rgba(255,255,255,0.2);background:transparent;
+            color:inherit;cursor:pointer;font-size:0.9rem">Revisar</button>
+          <button id="modal-confirm" style="padding:0.5rem 1.4rem;border-radius:0.5rem;
+            border:none;background:var(--color-primary,#7c3aed);
+            color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600">✅ Confirmar Envío</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    document.getElementById('modal-confirm').onclick = () => { overlay.remove(); resolve(true); };
+    document.getElementById('modal-cancel').onclick  = () => { overlay.remove(); resolve(false); };
+    overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); resolve(false); } });
+  });
 }
 
 // ─── Countdown al cierre de jornada ─────────────────────────

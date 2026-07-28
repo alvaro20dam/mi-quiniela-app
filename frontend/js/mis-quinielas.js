@@ -14,7 +14,15 @@ const TEAM_EMOJIS = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadUserHeader();
+  document.body.style.visibility = 'hidden';
+
+  const user = await loadUserHeader();
+  if (!user) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  document.body.style.visibility = 'visible';
   await loadHistory();
   setupLogout();
 });

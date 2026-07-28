@@ -131,6 +131,11 @@
   box-shadow: 0 0 0 3px var(--color-accent-glow);
 }
 
+.form-select option {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
 .form-input.error { border-color: var(--color-error); }
 .form-input.success { border-color: var(--color-success); }
 

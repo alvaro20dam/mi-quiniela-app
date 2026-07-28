@@ -70,9 +70,9 @@ def query(sql: str, params: tuple = None, fetchone: bool = False, fetchall: bool
     conn = get_db()
     with conn.cursor() as cur:
         cur.execute(sql, params)
+        conn.commit()  # Siempre hacer commit para queries como INSERT ... RETURNING id
         if fetchone:
             return cur.fetchone()
         if fetchall:
             return cur.fetchall()
-        conn.commit()
         return cur.rowcount

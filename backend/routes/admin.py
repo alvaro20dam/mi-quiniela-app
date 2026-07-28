@@ -13,6 +13,8 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt
 from flask import current_app
 import requests
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # Suprimir advertencias SSL en desarrollo
 from datetime import datetime, timezone
 from utils.db import query
 
@@ -504,8 +506,8 @@ def toggle_suscripcion():
     if nuevo_estado:
         query(
             """
-            INSERT INTO suscripciones (usuario_id, plan, fecha_inicio, fecha_fin, activa)
-            VALUES (%s, 'Activado por Admin', CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days', TRUE)
+            INSERT INTO suscripciones (usuario_id, plan_name, fecha_vigencia, estado_activo)
+            VALUES (%s, 'Activado por Admin', CURRENT_DATE + INTERVAL '30 days', TRUE)
             """,
             (usuario_id,)
         )
@@ -544,7 +546,7 @@ def importar_jornada():
     headers = {"X-Auth-Token": api_token}
 
     try:
-        resp = requests.get(url, headers=headers)
+        resp = requests.get(url, headers=headers, verify=False, timeout=15)
         if resp.status_code != 200:
             return jsonify({"error": f"Error de la API externa: {resp.status_code} - {resp.text}"}), 502
         
@@ -640,7 +642,7 @@ def actualizar_resultados():
     headers = {"X-Auth-Token": api_token}
 
     try:
-        resp = requests.get(url, headers=headers)
+        resp = requests.get(url, headers=headers, verify=False, timeout=15)
         if resp.status_code != 200:
             return jsonify({"error": f"Error de la API externa: {resp.status_code} - {resp.text}"}), 502
         
