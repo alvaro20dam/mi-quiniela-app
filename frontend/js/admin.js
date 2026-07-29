@@ -133,6 +133,17 @@ async function loadAdminData() {
     : '/admin/status';
 
   const { data, status } = await api.get(url);
+  
+  if (status === 404) {
+    showToast('No hay jornadas activas. Usa la opción de importar nueva jornada.', 'warning');
+    renderMetrics({});
+    renderJornadaEstado(null);
+    renderPartidosRealesContainer([]);
+    renderParticipantesContainer([]);
+    renderPendientesContainer([]);
+    return;
+  }
+
   if (status !== 200 || !data) {
     showToast('Error al cargar datos del panel admin.', 'error');
     return;
@@ -194,6 +205,14 @@ function renderJornadaEstado(estado) {
   const btnCerrar = document.getElementById('btn-cerrar-jornada');
   const btnAbrir  = document.getElementById('btn-abrir-jornada');
   const btnCalc   = document.getElementById('btn-calcular-puntos');
+
+  if (!estado) {
+    if (badge) { badge.className = 'badge badge-warning'; badge.textContent = 'Sin Jornadas'; }
+    if (btnCerrar) btnCerrar.style.display = 'none';
+    if (btnAbrir) btnAbrir.style.display = 'none';
+    if (btnCalc) btnCalc.style.display = 'none';
+    return;
+  }
 
   if (badge) {
     const cls  = estado === 'Abierta' ? 'badge-success' : estado === 'Cerrada' ? 'badge-warning' : 'badge-info';

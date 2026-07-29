@@ -79,12 +79,12 @@ class TestCalculadorPuntos(unittest.TestCase):
         )
         self.assertEqual(puntos, 3)
 
-    def test_tendencia_incorrecta_con_un_marcador_cero_puntos(self):
+    def test_tendencia_incorrecta_con_un_marcador_un_punto(self):
         """
-        Test: Validar que si no se acierte el ganador/empate, se otorga 0 puntos,
-        incluso si se acierten los goles de un equipo.
+        Test: Validar que si no se acierte el ganador/empate, pero se acierta 
+        al menos uno de los goles, se otorga 1 punto.
         Ejemplo: Pronóstico 1-1 vs Real 1-2 (Se predijo empate, fue victoria visitante. 
-        Coincide el gol del local, pero la tendencia es errónea, total 0 pts)
+        Coincide el gol del local, la tendencia es errónea, total 1 pt)
         """
         puntos = calcular_puntos_partido(
             goles_local_pronostico=1,
@@ -92,7 +92,7 @@ class TestCalculadorPuntos(unittest.TestCase):
             goles_local_real=1,
             goles_visitante_real=2
         )
-        self.assertEqual(puntos, 0)
+        self.assertEqual(puntos, 1)
 
     def test_sin_aciertos_cero_puntos(self):
         """

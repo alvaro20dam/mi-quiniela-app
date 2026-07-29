@@ -112,7 +112,10 @@
           </div>
 
           <div class="sidebar-section">
-            <h4>Reglas de puntuación</h4>
+            <h4 style="display:flex;align-items:center;gap:8px;">
+              Reglas de puntuación 
+              <span style="cursor:pointer;color:var(--color-primary);font-size:1.1em;" onclick="showRulesModal()" title="Ver ejemplos">ⓘ</span>
+            </h4>
             <div class="sidebar-stat">
               <span class="label">🎯 Marcador exacto</span>
               <span class="value badge badge-gold">5 pts</span>
@@ -124,6 +127,10 @@
             <div class="sidebar-stat">
               <span class="label">✅ Solo tendencia</span>
               <span class="value badge badge-info">3 pts</span>
+            </div>
+            <div class="sidebar-stat">
+              <span class="label">⚠️ Solo 1 gol</span>
+              <span class="value badge badge-warning">1 pt</span>
             </div>
             <div class="sidebar-stat">
               <span class="label">❌ Sin acierto</span>
@@ -200,9 +207,9 @@
   <div id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
 
   <!-- Scripts -->
-  <script src="js/api.js?v=3"></script>
-  <script src="js/auth.js?v=3"></script>
-  <script src="js/dashboard.js?v=3"></script>
+  <script src="js/api.js?v=4"></script>
+  <script src="js/auth.js?v=4"></script>
+  <script src="js/dashboard.js?v=4"></script>
 
   <script>
     // Sincronizar ambas barras de progreso

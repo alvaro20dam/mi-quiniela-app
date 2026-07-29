@@ -9,11 +9,11 @@ def calcular_puntos_partido(goles_local_pronostico: int, goles_visitante_pronost
     """
     Calcula los puntos obtenidos por un usuario en un partido individual de la Quiniela.
     
-    Reglas de negocio:
     - 5 puntos: Acierto de resultado completo (marcador exacto).
     - 4 puntos: Acierto de tendencia/ganador Y acierto de goles de AL MENOS UNO de los dos equipos (3 pts + 1 pt extra).
     - 3 puntos: Acierto de tendencia/ganador únicamente (sin acertar marcador ni goles individuales).
-    - 0 puntos: Sin acierto de tendencia/ganador (independientemente de si coincide algún gol).
+    - 1 punto: Sin acierto de tendencia/ganador, pero acierto de goles de AL MENOS UNO de los equipos.
+    - 0 puntos: Sin acierto de tendencia/ganador y sin acierto de goles.
     """
     # 1. Determinar tendencia real (L = Local, V = Visitante, E = Empate)
     if goles_local_real > goles_visitante_real:
@@ -33,7 +33,10 @@ def calcular_puntos_partido(goles_local_pronostico: int, goles_visitante_pronost
         
     # 3. Evaluar reglas de puntuación
     if tendencia_real != tendencia_pronostico:
-        # Si no se acierta la tendencia, se obtienen 0 puntos obligatoriamente
+        # Si no se acierta la tendencia, se obtienen 0 puntos por defecto.
+        # PERO si se acierta al menos uno de los goles (local o visitante), se otorga 1 punto.
+        if goles_local_pronostico == goles_local_real or goles_visitante_pronostico == goles_visitante_real:
+            return 1
         return 0
         
     # Si se acierta la tendencia:
