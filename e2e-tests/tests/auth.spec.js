@@ -6,10 +6,10 @@ test.describe('Auth Flow', () => {
     await page.goto('/index.html');
     
     // Verifica que el título de la página o encabezado sea correcto
-    await expect(page).toHaveTitle(/Mi Quiniela/i);
+    await expect(page).toHaveTitle(/Iniciar Sesión/i);
     
     // Verifica que el botón de login esté presente
-    const loginButton = page.locator('button:has-text("Entrar")');
+    const loginButton = page.locator('#btn-login');
     await expect(loginButton).toBeVisible();
   });
 });
