@@ -177,27 +177,29 @@ function renderPartidosRealesContainer(partidos) {
     return;
   }
 
-  container.innerHTML = partidos.map(p => {
+  container.innerHTML = `<div class="match-cards-grid">${partidos.map(p => {
     const isFinalizado = p.estado === 'Finalizado';
-    const golesLocal = p.goles_local_real !== null ? p.goles_local_real : '-';
-    const golesVisita = p.goles_visitante_real !== null ? p.goles_visitante_real : '-';
-    const badgeColor = isFinalizado ? 'var(--color-success)' : 'var(--color-warning)';
-    
+    const isEnCurso   = p.estado === 'En Curso';
+    const golesLocal  = p.goles_local_real   !== null && p.goles_local_real   !== undefined ? p.goles_local_real   : '–';
+    const golesVisita = p.goles_visitante_real !== null && p.goles_visitante_real !== undefined ? p.goles_visitante_real : '–';
+
+    const statusColor = isFinalizado ? 'var(--color-success)' : isEnCurso ? '#f59e0b' : 'var(--color-text-muted)';
+    const statusDot   = isFinalizado ? '' : isEnCurso ? '🔴 ' : '';
+
     return `
-      <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-border);font-size:var(--text-sm)">
-        <div style="flex:1;text-align:right;font-weight:600">${p.equipo_local}</div>
-        <div style="margin:0 var(--space-4);display:flex;align-items:center;gap:var(--space-2)">
-          <span style="font-weight:800;font-size:var(--text-base);background:var(--color-bg-dark);padding:4px 12px;border-radius:4px">${golesLocal}</span>
-          <span style="color:var(--color-text-muted)">-</span>
-          <span style="font-weight:800;font-size:var(--text-base);background:var(--color-bg-dark);padding:4px 12px;border-radius:4px">${golesVisita}</span>
+      <div class="match-score-card">
+        <div class="match-score-status" style="color:${statusColor}">${statusDot}${p.estado}</div>
+        <div class="match-score-row">
+          <span class="match-score-team">${p.equipo_local}</span>
+          <span class="match-score-goals">${golesLocal}</span>
         </div>
-        <div style="flex:1;text-align:left;font-weight:600">${p.equipo_visitante}</div>
-        <div style="margin-left:var(--space-3)">
-          <span style="font-size:10px;padding:2px 8px;border-radius:12px;border:1px solid ${badgeColor};color:${badgeColor}">${p.estado}</span>
+        <div class="match-score-row">
+          <span class="match-score-team">${p.equipo_visitante}</span>
+          <span class="match-score-goals">${golesVisita}</span>
         </div>
       </div>
     `;
-  }).join('');
+  }).join('')}</div>`;
 }
 
 function renderJornadaEstado(estado) {
