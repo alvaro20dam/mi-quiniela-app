@@ -347,10 +347,14 @@ function renderMatchCard(partido, locked = false) {
       </div>`;
   }
 
+  // Colores de los equipos para el fondo del escudo
+  const localColor = TEAM_COLORS[partido.equipo_local] || 'var(--color-bg-glass)';
+  const visColor = TEAM_COLORS[partido.equipo_visitante] || 'var(--color-bg-glass)';
+
   return `
     <div class="match-teams">
       <div class="team">
-        <div class="team-badge">${localEmoji}</div>
+        <div class="team-badge" style="background: ${localColor}; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">${localEmoji}</div>
         <div class="team-name">${partido.equipo_local}</div>
       </div>
       <div class="match-vs">
@@ -359,7 +363,7 @@ function renderMatchCard(partido, locked = false) {
         ${lockedBadge}
       </div>
       <div class="team">
-        <div class="team-badge">${visEmoji}</div>
+        <div class="team-badge" style="background: ${visColor}; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">${visEmoji}</div>
         <div class="team-name">${partido.equipo_visitante}</div>
       </div>
     </div>
