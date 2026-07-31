@@ -258,18 +258,13 @@ function renderParticipantesContainer(lista) {
             <div style="font-size:1.5rem;font-weight:800;color:var(--color-accent);line-height:1">${u.puntos_totales || 0} pts</div>
             <div style="font-size:10px;opacity:.5">Puntos actuales</div>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="togglePronosticos('pron-${idx}')">
+          <button class="btn btn-ghost btn-sm" onclick="togglePronosticos(this, 'pron-${idx}')" data-pronosticos='${JSON.stringify(u.pronosticos || []).replace(/'/g, "&#39;")}'>
             \u{1F50D} Ver Pronosticos
           </button>
         </div>
       </div>
       <div id="pron-${idx}" class="pronosticos-mini-list" style="display:none">
-        ${(u.pronosticos || []).map(p => `
-          <div class="pronostico-mini-item">
-            <span>\u26BD <strong>${p.equipo_local}</strong> vs <strong>${p.equipo_visitante}</strong></span>
-            <span style="font-weight:800;color:var(--color-gold)">${p.goles_local} - ${p.goles_visitante}</span>
-          </div>
-        `).join('')}
+        <!-- Se renderiza on-demand -->
       </div>
     </div>
   `).join('');
@@ -697,9 +692,24 @@ async function actualizarResultadosAPI() {
 // ────────────────────────────────────────────────────────────────────────────
 // BLOQUE 10: TOGGLE PRONOSTICOS
 // ────────────────────────────────────────────────────────────────────────────
-function togglePronosticos(elemId) {
+function togglePronosticos(btn, elemId) {
   const el = document.getElementById(elemId);
-  if (el) el.style.display = el.style.display === 'none' ? 'grid' : 'none';
+  if (!el) return;
+  
+  if (!el.dataset.rendered) {
+    try {
+      const pronosticos = JSON.parse(btn.dataset.pronosticos || "[]");
+      el.innerHTML = pronosticos.map(p => `
+        <div class="pronostico-mini-item" style="gap: 8px; align-items: stretch;">
+          <span style="flex: 1; line-height: 1.4; display: flex; align-items: center;">⚽ <strong>${p.equipo_local}</strong> vs <strong>${p.equipo_visitante}</strong></span>
+          <span style="font-weight:800; color:var(--color-gold); white-space:nowrap; display: flex; align-items: center; justify-content: center; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:4px; font-size: 1.1em;">${p.goles_local} - ${p.goles_visitante}</span>
+        </div>
+      `).join('');
+    } catch(e){}
+    el.dataset.rendered = 'true';
+  }
+
+  el.style.display = el.style.display === 'none' ? 'grid' : 'none';
 }
 
 // Exponer funciones al window
