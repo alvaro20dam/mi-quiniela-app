@@ -174,7 +174,15 @@ def admin_status():
 def cambiar_estado_jornada():
     """
     POST /api/admin/jornada/estado
-    Permite al administrador cambiar el estado de una jornada ('Abierta', 'Cerrada', 'Calculada').
+    Permite al administrador cambiar el estado de una jornada.
+
+    Transiciones permitidas:
+      Abierta  → Cerrada   (cerrar para que no se acepten más quinielas)
+      Cerrada  → Abierta   (reabrir si se cerró por error)
+
+    ⚠️ La transición → 'Calculada' NO está permitida desde aquí.
+       Solo el motor de cálculo (/api/quinielas/calcular/<id>) puede marcar
+       una jornada como Calculada, garantizando que los puntos se computen.
     """
     claims = get_jwt()
     if claims.get("rol") != "Administrador":
@@ -184,15 +192,56 @@ def cambiar_estado_jornada():
     jornada_id = data.get("jornada_id")
     nuevo_estado = data.get("estado")
 
-    if not jornada_id or nuevo_estado not in ["Abierta", "Cerrada", "Calculada"]:
-        return jsonify({"error": "Parámetros inválidos. Estado debe ser 'Abierta', 'Cerrada' o 'Calculada'."}), 400
+    if not jornada_id:
+        return jsonify({"error": "El campo 'jornada_id' es requerido."}), 400
+
+    # 'Calculada' solo puede establecerse a través del motor de cálculo
+    if nuevo_estado == "Calculada":
+        return jsonify({
+            "error": (
+                "No puedes marcar la jornada como 'Calculada' directamente. "
+                "Usa el botón '🧮 Calcular Puntos' para ejecutar el motor de cálculo, "
+                "que calculará los puntos de todos los participantes y luego marcará "
+                "la jornada como Calculada automáticamente."
+            )
+        }), 400
+
+    if nuevo_estado not in ["Abierta", "Cerrada"]:
+        return jsonify({"error": "Estado inválido. Solo se permite 'Abierta' o 'Cerrada' desde este endpoint."}), 400
+
+    # Verificar que la jornada existe y obtener su estado actual
+    jornada = query(
+        "SELECT id, numero_jornada, estado FROM jornadas WHERE id = %s",
+        (jornada_id,), fetchone=True
+    )
+    if not jornada:
+        return jsonify({"error": "Jornada no encontrada."}), 404
+
+    _, numero_jornada, estado_actual = jornada
+
+    # Validar transiciones lógicas
+    if estado_actual == "Calculada":
+        return jsonify({
+            "error": f"La jornada {numero_jornada} ya fue calculada y no puede reabrirse ni cerrarse."
+        }), 400
+
+    if estado_actual == nuevo_estado:
+        return jsonify({
+            "message": f"La jornada {numero_jornada} ya está en estado '{nuevo_estado}'."
+        }), 200
 
     query(
         "UPDATE jornadas SET estado = %s WHERE id = %s",
         (nuevo_estado, jornada_id)
     )
 
-    return jsonify({"message": f"Estado de la jornada actualizado a '{nuevo_estado}'."}), 200
+    accion = "cerrada" if nuevo_estado == "Cerrada" else "abierta"
+    return jsonify({
+        "message": f"Jornada {numero_jornada} {accion} exitosamente.",
+        "estado_anterior": estado_actual,
+        "estado_nuevo": nuevo_estado
+    }), 200
+
 
 @admin_bp.route("/jornada/<int:jornada_id>", methods=["DELETE"])
 @jwt_required()
