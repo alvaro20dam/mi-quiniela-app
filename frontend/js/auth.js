@@ -157,11 +157,24 @@ async function loadUserHeader() {
     if (avatarEl) avatarEl.textContent = data.nombre.charAt(0).toUpperCase();
     if (userNameEl) userNameEl.textContent = data.nombre;
 
-    // Badge de suscripción
+    // Profile chip badge de suscripción
     const subBadge = document.getElementById('sub-badge');
     if (subBadge) {
-      subBadge.textContent = data.suscripcion_activa ? '⭐ Premium' : 'Sin suscripción';
-      subBadge.className = `badge ${data.suscripcion_activa ? 'badge-gold' : 'badge-warning'}`;
+      if (data.suscripcion_activa) {
+        subBadge.textContent = '⭐ Premium';
+        subBadge.className = 'profile-chip-badge profile-chip-badge--premium';
+      } else {
+        subBadge.textContent = 'Sin suscripción';
+        subBadge.className = 'profile-chip-badge';
+      }
+    }
+
+    // Wire profile chip click → Bottom Sheet (no logout directo)
+    const chip = document.getElementById('profile-chip');
+    if (chip) {
+      chip.title = 'Ver perfil';
+      chip.style.cursor = 'pointer';
+      chip.addEventListener('click', () => openProfileSheet(data));
     }
 
     // Si el usuario es Administrador, mostrar link a Panel Admin en la barra de navegación y en la barra inferior (móvil)
@@ -235,3 +248,82 @@ window.setLoading = setLoading;
 window.showAlert = showAlert;
 window.clearAlert = clearAlert;
 window.loadUserHeader = loadUserHeader;
+
+// ────────────────────────────────────────────────────────────────────────────
+// PROFILE BOTTOM SHEET
+// ────────────────────────────────────────────────────────────────────────────
+function openProfileSheet(user) {
+  if (document.getElementById('profile-sheet-overlay')) return; // ya abierto
+
+  const isPremium = user.suscripcion_activa;
+  const initial  = (user.nombre || '?').charAt(0).toUpperCase();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'profile-sheet-overlay';
+  overlay.className = 'psheet-overlay';
+  overlay.innerHTML = `
+    <div class="psheet" role="dialog" aria-modal="true" aria-label="Perfil de usuario" id="profile-sheet">
+      <div class="psheet-handle"></div>
+
+      <!-- Avatar + info -->
+      <div class="psheet-header">
+        <div class="psheet-avatar">${initial}</div>
+        <div class="psheet-user-info">
+          <div class="psheet-name">${user.nombre}</div>
+          <div class="psheet-email">${user.email || ''}</div>
+          <span class="psheet-sub ${isPremium ? 'psheet-sub--premium' : ''}">
+            ${isPremium ? '⭐ Plan Premium' : 'Sin suscripción activa'}
+          </span>
+        </div>
+      </div>
+
+      <div class="psheet-divider"></div>
+
+      <!-- Acciones -->
+      <div class="psheet-actions">
+        <button class="psheet-btn psheet-btn--logout" id="psheet-logout-btn">
+          <span>🚪</span> Cerrar Sesión
+        </button>
+        <button class="psheet-btn psheet-btn--cancel" id="psheet-cancel-btn">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Forzar reflow para que la animación de entrada funcione
+  requestAnimationFrame(() => {
+    overlay.classList.add('psheet-overlay--open');
+    overlay.querySelector('#profile-sheet').classList.add('psheet--open');
+  });
+
+  // Cerrar al tocar el backdrop
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeProfileSheet();
+  });
+
+  document.getElementById('psheet-cancel-btn').addEventListener('click', closeProfileSheet);
+
+  document.getElementById('psheet-logout-btn').addEventListener('click', () => {
+    closeProfileSheet();
+    setTimeout(() => {
+      const logoutBtn = document.getElementById('btn-logout');
+      if (logoutBtn) logoutBtn.click();
+    }, 250);
+  });
+
+  // Cerrar con ESC
+  overlay._escHandler = (e) => { if (e.key === 'Escape') closeProfileSheet(); };
+  document.addEventListener('keydown', overlay._escHandler);
+}
+
+function closeProfileSheet() {
+  const overlay = document.getElementById('profile-sheet-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('psheet-overlay--open');
+  overlay.querySelector('#profile-sheet')?.classList.remove('psheet--open');
+  document.removeEventListener('keydown', overlay._escHandler);
+  setTimeout(() => overlay.remove(), 350);
+}

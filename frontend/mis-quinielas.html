@@ -10,9 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <link rel="stylesheet" href="css/design-system.css" />
-  <link rel="stylesheet" href="css/components.css" />
-  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/design-system.css?v=4" />
+  <link rel="stylesheet" href="css/components.css?v=4" />
+  <link rel="stylesheet" href="css/responsive.css?v=4" />
+
 
   <style>
     .history-grid {
@@ -53,9 +54,18 @@
 
       <!-- User área -->
       <div class="header-user">
-        <span id="sub-badge" class="badge badge-gold" style="display:none"></span>
-        <div id="user-avatar" class="user-avatar" title="Mi perfil">?</div>
-        <button id="btn-logout" class="btn btn-ghost btn-sm" aria-label="Cerrar sesión">Salir</button>
+        <!-- Profile Chip -->
+        <div class="profile-chip" id="profile-chip">
+          <div class="profile-chip-avatar-wrap">
+            <div id="user-avatar" class="user-avatar profile-chip-avatar" title="Mi perfil">?</div>
+            <span class="profile-chip-online" aria-hidden="true"></span>
+          </div>
+          <div class="profile-chip-info">
+            <span id="user-name" class="profile-chip-name">Cargando...</span>
+            <span id="sub-badge" class="profile-chip-badge">Sin suscripción</span>
+          </div>
+        </div>
+        <button id="btn-logout" class="btn btn-ghost btn-sm" aria-label="Cerrar sesión" style="display:none">Salir</button>
       </div>
     </div>
   </header>

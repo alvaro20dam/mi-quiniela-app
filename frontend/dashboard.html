@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <link rel="stylesheet" href="css/design-system.css?v=3" />
-  <link rel="stylesheet" href="css/components.css?v=3" />
-  <link rel="stylesheet" href="css/responsive.css?v=3" />
+  <link rel="stylesheet" href="css/design-system.css?v=4" />
+  <link rel="stylesheet" href="css/components.css?v=4" />
+  <link rel="stylesheet" href="css/responsive.css?v=4" />
 
   <style>
     .counter-value {
@@ -28,12 +28,6 @@
     @media (max-width: 1023px) {
       .sidebar { display: none; }
       .dashboard-layout { display: block; }
-    }
-
-    /* Ocultar "Salir" en mobile para ahorrar espacio en header */
-    @media (max-width: 767px) {
-      #btn-logout { display: none; }
-      .header-user { gap: var(--space-2); }
     }
   </style>
 </head>
@@ -70,9 +64,19 @@
           <span id="header-countdown-text">—</span>
         </div>
 
-        <span id="sub-badge" class="badge badge-gold" style="display:none"></span>
-        <div id="user-avatar" class="user-avatar" title="Mi perfil" aria-label="Avatar de usuario">?</div>
-        <button id="btn-logout" class="btn btn-ghost btn-sm" aria-label="Cerrar sesión">
+        <!-- Profile Chip -->
+        <div class="profile-chip" id="profile-chip">
+          <div class="profile-chip-avatar-wrap">
+            <div id="user-avatar" class="user-avatar profile-chip-avatar" aria-label="Avatar de usuario">?</div>
+            <span class="profile-chip-online" aria-hidden="true"></span>
+          </div>
+          <div class="profile-chip-info">
+            <span id="user-name" class="profile-chip-name">Cargando...</span>
+            <span id="sub-badge" class="profile-chip-badge">Sin suscripción</span>
+          </div>
+        </div>
+
+        <button id="btn-logout" class="btn btn-ghost btn-sm" aria-label="Cerrar sesión" style="display:none">
           Salir
         </button>
       </div>
