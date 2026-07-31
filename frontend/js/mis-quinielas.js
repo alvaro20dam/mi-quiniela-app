@@ -99,7 +99,7 @@ function renderHistoryCard(quiniela) {
         <div class="mq-match-card-inner">
           <!-- Local -->
           <div class="mq-match-row">
-            <span class="mq-match-team">${locE} ${p.equipo_local}</span>
+            <span class="mq-match-team">${p.equipo_local}</span>
             <div class="mq-match-scores">
               <span class="mq-score-pred" title="Tu pronóstico">${pLocal}</span>
               <span class="mq-score-real ${isFinalizado ? '' : 'mq-score-pending'}" title="Resultado real">${rLocal}</span>
@@ -107,7 +107,7 @@ function renderHistoryCard(quiniela) {
           </div>
           <!-- Visitante -->
           <div class="mq-match-row">
-            <span class="mq-match-team">${visE} ${p.equipo_visitante}</span>
+            <span class="mq-match-team">${p.equipo_visitante}</span>
             <div class="mq-match-scores">
               <span class="mq-score-pred" title="Tu pronóstico">${pVisit}</span>
               <span class="mq-score-real ${isFinalizado ? '' : 'mq-score-pending'}" title="Resultado real">${rVisit}</span>
