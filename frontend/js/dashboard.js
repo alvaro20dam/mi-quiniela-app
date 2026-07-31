@@ -22,25 +22,9 @@ const state = {
   user: null,
 };
 
-// Emojis de equipos de La Liga (mapa visual)
-const TEAM_EMOJIS = {
-  'Real Madrid': '👑',
-  'FC Barcelona': '🔵', 'Barcelona': '🔵',
-  'Atlético de Madrid': '🔴', 'Atletico de Madrid': '🔴',
-  'Sevilla FC': '⚪', 'Sevilla': '⚪',
-  'Real Betis': '🟢', 'Betis': '🟢',
-  'Real Sociedad': '🔵',
-  'Valencia CF': '🦇', 'Valencia': '🦇',
-  'Villarreal CF': '🟡', 'Villarreal': '🟡',
-  'Athletic Club': '🦁',
-  'Rayo Vallecano': '⚡', 'Osasuna': '🔴', 'Celta de Vigo': '🩵',
-  'Getafe CF': '🔵', 'Getafe': '🔵', 'Espanyol': '🔵', 'UD Las Palmas': '🌴',
-  'Deportivo Alavés': '🔵', 'RCD Mallorca': '🔴', 'Girona FC': '🔴',
-  'Leganés': '🥒', 'Real Valladolid': '🟣',
-};
-
-// Colores oficiales de los equipos (Fondo del badge)
+// Colores oficiales de los equipos (Fondo del badge sin emoji)
 const TEAM_COLORS = {
+  // Primera División
   'Real Madrid': 'linear-gradient(135deg, #ffffff 50%, #b9b7b8 50%)',
   'FC Barcelona': 'linear-gradient(135deg, #004d98 50%, #a50044 50%)', 'Barcelona': 'linear-gradient(135deg, #004d98 50%, #a50044 50%)',
   'Atlético de Madrid': 'linear-gradient(135deg, #cb3524 50%, #ffffff 50%)', 'Atletico de Madrid': 'linear-gradient(135deg, #cb3524 50%, #ffffff 50%)',
@@ -49,25 +33,40 @@ const TEAM_COLORS = {
   'Real Sociedad': 'linear-gradient(135deg, #005c9e 50%, #ffffff 50%)',
   'Valencia CF': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)', 'Valencia': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
   'Villarreal CF': 'linear-gradient(135deg, #fceb00 50%, #002d72 50%)', 'Villarreal': 'linear-gradient(135deg, #fceb00 50%, #002d72 50%)',
-  'Athletic Club': 'linear-gradient(135deg, #ed1c24 50%, #ffffff 50%)',
+  'Athletic Club': 'linear-gradient(135deg, #ed1c24 50%, #ffffff 50%)', 'Athletic': 'linear-gradient(135deg, #ed1c24 50%, #ffffff 50%)',
   'Rayo Vallecano': 'linear-gradient(135deg, #ffffff 50%, #ed1c24 50%)', 'Rayo Vallecano de Madrid': 'linear-gradient(135deg, #ffffff 50%, #ed1c24 50%)',
   'Osasuna': 'linear-gradient(135deg, #d42027 50%, #0a1c2c 50%)', 'CA Osasuna': 'linear-gradient(135deg, #d42027 50%, #0a1c2c 50%)',
   'Celta de Vigo': 'linear-gradient(135deg, #b3d6f2 50%, #ffffff 50%)', 'RC Celta de Vigo': 'linear-gradient(135deg, #b3d6f2 50%, #ffffff 50%)',
   'Getafe CF': 'linear-gradient(135deg, #004bb1 50%, #003780 50%)', 'Getafe': 'linear-gradient(135deg, #004bb1 50%, #003780 50%)',
   'Espanyol': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)', 'RCD Espanyol': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)', 'Espanyol de Barcelona': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)',
   'UD Las Palmas': 'linear-gradient(135deg, #ffd700 50%, #003d95 50%)',
-  'Deportivo Alavés': 'linear-gradient(135deg, #0040a5 50%, #ffffff 50%)',
-  'RCD Mallorca': 'linear-gradient(135deg, #d7262d 50%, #000000 50%)',
-  'Girona FC': 'linear-gradient(135deg, #ff1e00 50%, #ffffff 50%)',
+  'Deportivo Alavés': 'linear-gradient(135deg, #0040a5 50%, #ffffff 50%)', 'Alavés': 'linear-gradient(135deg, #0040a5 50%, #ffffff 50%)',
+  'RCD Mallorca': 'linear-gradient(135deg, #d7262d 50%, #000000 50%)', 'Mallorca': 'linear-gradient(135deg, #d7262d 50%, #000000 50%)',
+  'Girona FC': 'linear-gradient(135deg, #ff1e00 50%, #ffffff 50%)', 'Girona': 'linear-gradient(135deg, #ff1e00 50%, #ffffff 50%)',
   'Leganés': 'linear-gradient(135deg, #005096 50%, #ffffff 50%)', 'CD Leganés': 'linear-gradient(135deg, #005096 50%, #ffffff 50%)',
   'Real Valladolid': 'linear-gradient(135deg, #422a89 50%, #ffffff 50%)', 'Real Valladolid CF': 'linear-gradient(135deg, #422a89 50%, #ffffff 50%)',
-  'Málaga CF': 'linear-gradient(135deg, #00a7e7 50%, #ffffff 50%)',
-  'RC Deportivo La Coruña': 'linear-gradient(135deg, #0053a0 50%, #ffffff 50%)',
-  'Levante UD': 'linear-gradient(135deg, #9b003a 50%, #003fa4 50%)',
-  'Real Racing Club de Santander': 'linear-gradient(135deg, #ffffff 50%, #006e44 50%)',
-  'Real Zaragoza': 'linear-gradient(135deg, #ffffff 50%, #005ca6 50%)',
-  'Sporting de Gijón': 'linear-gradient(135deg, #e4002b 50%, #ffffff 50%)',
-  'Real Oviedo': 'linear-gradient(135deg, #003c71 50%, #ffffff 50%)',
+  
+  // Segunda División e Históricos
+  'Málaga CF': 'linear-gradient(135deg, #00a7e7 50%, #ffffff 50%)', 'Málaga': 'linear-gradient(135deg, #00a7e7 50%, #ffffff 50%)',
+  'RC Deportivo La Coruña': 'linear-gradient(135deg, #0053a0 50%, #ffffff 50%)', 'Deportivo La Coruña': 'linear-gradient(135deg, #0053a0 50%, #ffffff 50%)', 'RC Deportivo': 'linear-gradient(135deg, #0053a0 50%, #ffffff 50%)',
+  'Levante UD': 'linear-gradient(135deg, #9b003a 50%, #003fa4 50%)', 'Levante': 'linear-gradient(135deg, #9b003a 50%, #003fa4 50%)',
+  'Real Racing Club de Santander': 'linear-gradient(135deg, #ffffff 50%, #006e44 50%)', 'Racing de Santander': 'linear-gradient(135deg, #ffffff 50%, #006e44 50%)', 'Racing': 'linear-gradient(135deg, #ffffff 50%, #006e44 50%)',
+  'Real Zaragoza': 'linear-gradient(135deg, #ffffff 50%, #005ca6 50%)', 'Zaragoza': 'linear-gradient(135deg, #ffffff 50%, #005ca6 50%)',
+  'Sporting de Gijón': 'linear-gradient(135deg, #e4002b 50%, #ffffff 50%)', 'Real Sporting': 'linear-gradient(135deg, #e4002b 50%, #ffffff 50%)',
+  'Real Oviedo': 'linear-gradient(135deg, #003c71 50%, #ffffff 50%)', 'Oviedo': 'linear-gradient(135deg, #003c71 50%, #ffffff 50%)',
+  'Granada CF': 'linear-gradient(135deg, #c8102e 50%, #ffffff 50%)', 'Granada': 'linear-gradient(135deg, #c8102e 50%, #ffffff 50%)',
+  'Elche CF': 'linear-gradient(135deg, #ffffff 50%, #00602f 50%)', 'Elche': 'linear-gradient(135deg, #ffffff 50%, #00602f 50%)',
+  'Cádiz CF': 'linear-gradient(135deg, #fced00 50%, #004ba0 50%)', 'Cádiz': 'linear-gradient(135deg, #fced00 50%, #004ba0 50%)',
+  'SD Eibar': 'linear-gradient(135deg, #003366 50%, #c8102e 50%)', 'Eibar': 'linear-gradient(135deg, #003366 50%, #c8102e 50%)',
+  'CD Tenerife': 'linear-gradient(135deg, #ffffff 50%, #00458a 50%)', 'Tenerife': 'linear-gradient(135deg, #ffffff 50%, #00458a 50%)',
+  'Albacete Balompié': 'linear-gradient(135deg, #ffffff 50%, #800020 50%)', 'Albacete': 'linear-gradient(135deg, #ffffff 50%, #800020 50%)',
+  'UD Almería': 'linear-gradient(135deg, #da291c 50%, #ffffff 50%)', 'Almería': 'linear-gradient(135deg, #da291c 50%, #ffffff 50%)',
+  'Burgos CF': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)', 'Burgos': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'FC Cartagena': 'linear-gradient(135deg, #000000 50%, #ffffff 50%)', 'Cartagena': 'linear-gradient(135deg, #000000 50%, #ffffff 50%)',
+  'CD Mirandés': 'linear-gradient(135deg, #e00000 50%, #000000 50%)', 'Mirandés': 'linear-gradient(135deg, #e00000 50%, #000000 50%)',
+  'SD Huesca': 'linear-gradient(135deg, #0033a0 50%, #e30613 50%)', 'Huesca': 'linear-gradient(135deg, #0033a0 50%, #e30613 50%)',
+  'Racing Club Ferrol': 'linear-gradient(135deg, #00703c 50%, #ffffff 50%)', 'Racing de Ferrol': 'linear-gradient(135deg, #00703c 50%, #ffffff 50%)',
+  'CD Eldense': 'linear-gradient(135deg, #0033a0 50%, #e30613 50%)', 'Eldense': 'linear-gradient(135deg, #0033a0 50%, #e30613 50%)',
 };
 
 
@@ -323,8 +322,6 @@ function getTendency(gLocal, gVisitante) {
 
 // ─── Renderizar una tarjeta de partido ───────────────────────
 function renderMatchCard(partido, locked = false) {
-  const localEmoji = TEAM_EMOJIS[partido.equipo_local] || '⚽';
-  const visEmoji   = TEAM_EMOJIS[partido.equipo_visitante] || '⚽';
   // La API devuelve fechas en UTC. new Date() las convierte automáticamente a la hora local del navegador.
   const matchDate  = new Date(partido.fecha_partido);
   const datePart   = matchDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -354,7 +351,7 @@ function renderMatchCard(partido, locked = false) {
   return `
     <div class="match-teams">
       <div class="team">
-        <div class="team-badge" style="background: ${localColor}; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">${localEmoji}</div>
+        <div class="team-badge" style="background: ${localColor}; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);"></div>
         <div class="team-name">${partido.equipo_local}</div>
       </div>
       <div class="match-vs">
@@ -363,7 +360,7 @@ function renderMatchCard(partido, locked = false) {
         ${lockedBadge}
       </div>
       <div class="team">
-        <div class="team-badge" style="background: ${visColor}; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">${visEmoji}</div>
+        <div class="team-badge" style="background: ${visColor}; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);"></div>
         <div class="team-name">${partido.equipo_visitante}</div>
       </div>
     </div>
