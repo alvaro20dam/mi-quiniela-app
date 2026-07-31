@@ -700,9 +700,15 @@ function togglePronosticos(btn, elemId) {
     try {
       const pronosticos = JSON.parse(btn.dataset.pronosticos || "[]");
       el.innerHTML = pronosticos.map(p => `
-        <div class="pronostico-mini-item" style="gap: 8px; align-items: stretch;">
-          <span style="flex: 1; line-height: 1.4; display: flex; align-items: center;">⚽ <strong>${p.equipo_local}</strong> vs <strong>${p.equipo_visitante}</strong></span>
-          <span style="font-weight:800; color:var(--color-gold); white-space:nowrap; display: flex; align-items: center; justify-content: center; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:4px; font-size: 1.1em;">${p.goles_local} - ${p.goles_visitante}</span>
+        <div class="pronostico-mini-item" style="flex-direction: column; align-items: stretch; gap: 8px; padding: 12px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05);">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+            <span style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--color-text-primary);"><span style="opacity:0.4; margin-right:6px; font-size:0.9em;">🏠</span>${p.equipo_local}</span>
+            <span style="font-weight: 800; color: var(--color-gold); font-size: 1.1em; min-width: 24px; text-align: center; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">${p.goles_local}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+            <span style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--color-text-primary);"><span style="opacity:0.4; margin-right:6px; font-size:0.9em;">✈️</span>${p.equipo_visitante}</span>
+            <span style="font-weight: 800; color: var(--color-gold); font-size: 1.1em; min-width: 24px; text-align: center; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">${p.goles_visitante}</span>
+          </div>
         </div>
       `).join('');
     } catch(e){}
