@@ -73,42 +73,52 @@ function renderHistoryCard(quiniela) {
 
   // Construir filas de partidos (ocultas por defecto)
   const rowsHTML = quiniela.pronosticos.map(p => {
-    const locE = TEAM_EMOJIS[p.equipo_local] || '⚽';
-    const visE = TEAM_EMOJIS[p.equipo_visitante] || '⚽';
+    const locE  = TEAM_EMOJIS[p.equipo_local]     || '⚽';
+    const visE  = TEAM_EMOJIS[p.equipo_visitante] || '⚽';
 
     // Pronóstico del usuario
-    const pStr = `${p.goles_local_pronostico} - ${p.goles_visitante_pronostico}`;
+    const pLocal = p.goles_local_pronostico;
+    const pVisit = p.goles_visitante_pronostico;
 
     // Resultado real y puntos
-    let rStr = 'vs';
+    const isFinalizado = p.estado_partido === 'Finalizado' && p.goles_local_real !== null;
+    const rLocal  = isFinalizado ? p.goles_local_real        : '–';
+    const rVisit  = isFinalizado ? p.goles_visitante_real    : '–';
+
     let ptsClass = 'pts-pending';
-    let ptsText = '-';
-
-    if (p.estado_partido === 'Finalizado' && p.goles_local_real !== null) {
-      rStr = `${p.goles_local_real} - ${p.goles_visitante_real}`;
+    let ptsText  = '·';
+    if (isFinalizado) {
       ptsText = `+${p.puntos_obtenidos}`;
-
-      if (p.puntos_obtenidos === 5) ptsClass = 'pts-exact';
+      if      (p.puntos_obtenidos === 5)                              ptsClass = 'pts-exact';
       else if (p.puntos_obtenidos === 4 || p.puntos_obtenidos === 3) ptsClass = 'pts-tend';
-      else if (p.puntos_obtenidos === 0) {
-        ptsClass = 'pts-zero';
-        ptsText = '0';
-      }
+      else { ptsClass = 'pts-zero'; ptsText = '0'; }
     }
 
     return `
-      <div class="match-result-row">
-        <div style="display:flex;flex-direction:column;gap:2px">
-          <div>${locE} ${p.equipo_local}</div>
-          <div style="font-size:11px;color:var(--color-text-muted)">Tú: ${pStr}</div>
+      <div class="mq-match-card">
+        <div class="mq-match-card-inner">
+          <!-- Local -->
+          <div class="mq-match-row">
+            <span class="mq-match-team">${locE} ${p.equipo_local}</span>
+            <div class="mq-match-scores">
+              <span class="mq-score-pred" title="Tu pronóstico">${pLocal}</span>
+              <span class="mq-score-real ${isFinalizado ? '' : 'mq-score-pending'}" title="Resultado real">${rLocal}</span>
+            </div>
+          </div>
+          <!-- Visitante -->
+          <div class="mq-match-row">
+            <span class="mq-match-team">${visE} ${p.equipo_visitante}</span>
+            <div class="mq-match-scores">
+              <span class="mq-score-pred" title="Tu pronóstico">${pVisit}</span>
+              <span class="mq-score-real ${isFinalizado ? '' : 'mq-score-pending'}" title="Resultado real">${rVisit}</span>
+            </div>
+          </div>
         </div>
-        <div class="match-result-score">${rStr}</div>
-        <div style="display:flex;flex-direction:column;gap:2px;align-items:flex-end;text-align:right">
-          <div>${p.equipo_visitante} ${visE}</div>
-        </div>
-        <div class="match-result-pts ${ptsClass}">${ptsText}</div>
+        <!-- Badge de puntos -->
+        <div class="mq-match-pts ${ptsClass}" title="Puntos obtenidos">${ptsText}</div>
       </div>
     `;
+
   }).join('');
 
   return `
@@ -124,7 +134,12 @@ function renderHistoryCard(quiniela) {
         </div>
       </div>
       <div class="quiniela-history-body" id="body-${quiniela.quiniela_id}">
-        ${rowsHTML}
+        <div class="mq-legend">
+          <span>Partido</span>
+          <div class="mq-legend-scores"><span>Tú</span><span>Real</span></div>
+          <span>Pts</span>
+        </div>
+        <div class="mq-match-list">${rowsHTML}</div>
       </div>
     </div>
   `;

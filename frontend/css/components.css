@@ -1142,29 +1142,127 @@
 
 .quiniela-history-body.open { display: block; }
 
-.match-result-row {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr auto;
+.match-result-row { display: none; } /* legacy — superseded by mq-match-card */
+
+/* ─── Mis Quinielas — Match Cards ──────────────────────────── */
+.mq-legend {
+  display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--color-border);
-  font-size: var(--text-sm);
+  gap: 8px;
+  padding: 6px 14px 6px 14px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  margin-bottom: 6px;
 }
 
-.match-result-row:last-child { border-bottom: none; }
+.mq-legend > span:first-child { flex: 1; }
+.mq-legend > span:last-child  { min-width: 38px; text-align: center; }
 
-.match-result-score {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  letter-spacing: 0.05em;
+.mq-legend-scores {
+  display: flex;
+  gap: 6px;
+}
+
+.mq-legend-scores span {
+  min-width: 28px;
   text-align: center;
 }
 
-.match-result-pts {
-  text-align: right;
+.mq-match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 4px 8px;
+}
+
+.mq-match-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: background var(--transition-fast);
+}
+
+.mq-match-card:hover { background: rgba(255,255,255,0.06); }
+
+.mq-match-card-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.mq-match-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mq-match-team {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mq-match-scores {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mq-score-pred {
+  min-width: 28px;
+  text-align: center;
+  font-size: 13px;
   font-weight: 700;
-  min-width: 50px;
+  color: var(--color-text-muted);
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.mq-score-real {
+  min-width: 28px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-gold);
+  background: rgba(0,0,0,0.25);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.mq-score-pending {
+  color: var(--color-text-muted);
+  background: rgba(255,255,255,0.04);
+  font-style: normal;
+}
+
+.mq-match-pts {
+  flex-shrink: 0;
+  min-width: 38px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  background: rgba(0,0,0,0.25);
+  border-radius: 6px;
+  padding: 4px 6px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pts-exact   { color: var(--color-gold); }
