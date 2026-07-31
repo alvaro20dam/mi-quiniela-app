@@ -453,11 +453,11 @@
 .score-counter {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 4px; /* Menos gap para evitar overflow horizontal */
   background: rgba(0, 0, 0, 0.2); /* Fondo más profundo */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: var(--space-1);
+  padding: 4px; /* Padding ajustado */
   transition: all var(--transition-normal);
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); /* Efecto hundido */
 }
@@ -468,8 +468,8 @@
 }
 
 .counter-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border: 1px solid transparent;
   background: var(--color-bg-glass);
   color: var(--color-text-primary);
@@ -483,8 +483,7 @@
   transition: all var(--transition-bounce);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  min-width: 44px; /* Accesibilidad táctil */
-  min-height: 44px;
+  /* Eliminados min-width/min-height de 44px para evitar que los botones se salgan de la tarjeta */
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
@@ -503,7 +502,7 @@
 }
 
 .counter-value {
-  min-width: 36px;
+  min-width: 28px; /* Reducido para evitar overflow */
   text-align: center;
   font-size: var(--text-2xl); /* Número más grande */
   font-weight: 800; /* Más bold */
@@ -517,6 +516,7 @@
   color: var(--color-text-muted);
   line-height: 1;
   padding: 0 var(--space-1);
+  margin-top: 18px; /* Para alinear verticalmente con los números, ya que el contenedor tiene label arriba */
 }
 
 /* ─── Ranking Table ────────────────────────────────────────── */
