@@ -210,6 +210,7 @@ async function renderJornadaData(jornada, partidos) {
           msg.id = 'admin-read-only-msg';
           msg.className = 'alert alert-info';
           msg.style.marginTop = '1rem';
+          msg.style.marginBottom = '1.5rem';
           msg.innerHTML = '<strong>Modo Auditoría:</strong> Los administradores no participan en las quinielas. Visualización de solo lectura.';
           jornadaHeader.parentNode.insertBefore(msg, jornadaHeader.nextSibling);
       }
@@ -223,6 +224,7 @@ async function renderJornadaData(jornada, partidos) {
           msg.id = 'inactive-sub-msg';
           msg.className = 'alert alert-warning';
           msg.style.marginTop = '1rem';
+          msg.style.marginBottom = '1.5rem';
           msg.innerHTML = '<strong>⚠️ Suscripción Inactiva:</strong> No puedes enviar pronósticos. Por favor, contacta con el supervisor o administrador para activar tu suscripción.';
           jornadaHeader.parentNode.insertBefore(msg, jornadaHeader.nextSibling);
       }
