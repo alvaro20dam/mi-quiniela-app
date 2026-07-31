@@ -164,17 +164,34 @@ async function loadUserHeader() {
       subBadge.className = `badge ${data.suscripcion_activa ? 'badge-gold' : 'badge-warning'}`;
     }
 
-    // Si el usuario es Administrador, mostrar link a Panel Admin en la barra de navegación
+    // Si el usuario es Administrador, mostrar link a Panel Admin en la barra de navegación y en la barra inferior (móvil)
     if (data.rol === 'Administrador') {
+      const isCurrentPage = window.location.pathname.includes('admin.html');
+      
       const headerNav = document.querySelector('.header-nav');
       if (headerNav && !document.getElementById('nav-admin')) {
         const adminLink = document.createElement('a');
         adminLink.href = 'admin.html';
         adminLink.id = 'nav-admin';
-        const isCurrentPage = window.location.pathname.includes('admin.html');
         adminLink.className = `nav-link ${isCurrentPage ? 'active' : ''}`;
         adminLink.innerHTML = '<span aria-hidden="true">⚙️</span> Panel Admin';
         headerNav.appendChild(adminLink);
+      }
+
+      const bottomNavInner = document.querySelector('.bottom-nav-inner');
+      if (bottomNavInner && !document.getElementById('bnav-admin')) {
+        const adminBnav = document.createElement('a');
+        adminBnav.href = 'admin.html';
+        adminBnav.id = 'bnav-admin';
+        adminBnav.className = `bottom-nav-item ${isCurrentPage ? 'active' : ''}`;
+        adminBnav.innerHTML = '<span class="bottom-nav-icon" aria-hidden="true">⚙️</span><span>Admin</span>';
+        
+        const logoutBtn = document.getElementById('bnav-logout');
+        if (logoutBtn) {
+          bottomNavInner.insertBefore(adminBnav, logoutBtn);
+        } else {
+          bottomNavInner.appendChild(adminBnav);
+        }
       }
     }
 
