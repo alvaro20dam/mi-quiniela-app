@@ -25,12 +25,12 @@ const state = {
 // Colores oficiales de los equipos (Fondo del badge sin emoji)
 const TEAM_COLORS = {
   // Primera División
-  'Real Madrid': 'linear-gradient(135deg, #ffffff 50%, #b9b7b8 50%)',
+  'Real Madrid': 'linear-gradient(135deg, #ffffff 50%, #b9b7b8 50%)', 'Real Madrid CF': 'linear-gradient(135deg, #ffffff 50%, #b9b7b8 50%)',
   'FC Barcelona': 'linear-gradient(135deg, #004d98 50%, #a50044 50%)', 'Barcelona': 'linear-gradient(135deg, #004d98 50%, #a50044 50%)',
-  'Atlético de Madrid': 'linear-gradient(135deg, #cb3524 50%, #ffffff 50%)', 'Atletico de Madrid': 'linear-gradient(135deg, #cb3524 50%, #ffffff 50%)',
+  'Atlético de Madrid': 'linear-gradient(135deg, #cb3524 50%, #ffffff 50%)', 'Atletico de Madrid': 'linear-gradient(135deg, #cb3524 50%, #ffffff 50%)', 'Club Atlético de Madrid': 'linear-gradient(135deg, #cb3524 50%, #ffffff 50%)',
   'Sevilla FC': 'linear-gradient(135deg, #ffffff 50%, #f01524 50%)', 'Sevilla': 'linear-gradient(135deg, #ffffff 50%, #f01524 50%)',
-  'Real Betis': 'linear-gradient(135deg, #00824b 50%, #ffffff 50%)', 'Betis': 'linear-gradient(135deg, #00824b 50%, #ffffff 50%)',
-  'Real Sociedad': 'linear-gradient(135deg, #005c9e 50%, #ffffff 50%)',
+  'Real Betis': 'linear-gradient(135deg, #00824b 50%, #ffffff 50%)', 'Betis': 'linear-gradient(135deg, #00824b 50%, #ffffff 50%)', 'Real Betis Balompié': 'linear-gradient(135deg, #00824b 50%, #ffffff 50%)',
+  'Real Sociedad': 'linear-gradient(135deg, #005c9e 50%, #ffffff 50%)', 'Real Sociedad de Fútbol': 'linear-gradient(135deg, #005c9e 50%, #ffffff 50%)',
   'Valencia CF': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)', 'Valencia': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
   'Villarreal CF': 'linear-gradient(135deg, #fceb00 50%, #002d72 50%)', 'Villarreal': 'linear-gradient(135deg, #fceb00 50%, #002d72 50%)',
   'Athletic Club': 'linear-gradient(135deg, #ed1c24 50%, #ffffff 50%)', 'Athletic': 'linear-gradient(135deg, #ed1c24 50%, #ffffff 50%)',
@@ -38,7 +38,7 @@ const TEAM_COLORS = {
   'Osasuna': 'linear-gradient(135deg, #d42027 50%, #0a1c2c 50%)', 'CA Osasuna': 'linear-gradient(135deg, #d42027 50%, #0a1c2c 50%)',
   'Celta de Vigo': 'linear-gradient(135deg, #b3d6f2 50%, #ffffff 50%)', 'RC Celta de Vigo': 'linear-gradient(135deg, #b3d6f2 50%, #ffffff 50%)',
   'Getafe CF': 'linear-gradient(135deg, #004bb1 50%, #003780 50%)', 'Getafe': 'linear-gradient(135deg, #004bb1 50%, #003780 50%)',
-  'Espanyol': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)', 'RCD Espanyol': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)', 'Espanyol de Barcelona': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)',
+  'Espanyol': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)', 'RCD Espanyol': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)', 'Espanyol de Barcelona': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)', 'RCD Espanyol de Barcelona': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)',
   'UD Las Palmas': 'linear-gradient(135deg, #ffd700 50%, #003d95 50%)',
   'Deportivo Alavés': 'linear-gradient(135deg, #0040a5 50%, #ffffff 50%)', 'Alavés': 'linear-gradient(135deg, #0040a5 50%, #ffffff 50%)',
   'RCD Mallorca': 'linear-gradient(135deg, #d7262d 50%, #000000 50%)', 'Mallorca': 'linear-gradient(135deg, #d7262d 50%, #000000 50%)',
@@ -351,7 +351,7 @@ function renderMatchCard(partido, locked = false) {
   return `
     <div class="match-teams">
       <div class="team">
-        <div class="team-badge" style="background: ${localColor}; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);"></div>
+        <div class="team-badge" style="background: ${localColor}; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">⚽</div>
         <div class="team-name">${partido.equipo_local}</div>
       </div>
       <div class="match-vs">
@@ -360,7 +360,7 @@ function renderMatchCard(partido, locked = false) {
         ${lockedBadge}
       </div>
       <div class="team">
-        <div class="team-badge" style="background: ${visColor}; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);"></div>
+        <div class="team-badge" style="background: ${visColor}; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">⚽</div>
         <div class="team-name">${partido.equipo_visitante}</div>
       </div>
     </div>
