@@ -220,28 +220,10 @@ async function renderJornadaData(jornada, partidos) {
     submitBar.style.display = state.jornadaLocked ? 'none' : '';
   }
 
-  // Renderizar tarjetas de partido con separadores de día
+  // Renderizar tarjetas de partido
   const grid = document.getElementById('matches-grid');
   grid.innerHTML = '';
-  let lastDay = '';
-
   partidos.forEach((partido, idx) => {
-    // Extraer el día de la semana (ej. 'sábado', 'domingo')
-    const matchDate = new Date(partido.fecha_partido);
-    const dayStr = matchDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-
-    if (dayStr !== lastDay) {
-      const divider = document.createElement('div');
-      divider.style.gridColumn = '1 / -1';
-      divider.style.marginTop = idx === 0 ? '0' : 'var(--space-6)';
-      divider.style.marginBottom = 'var(--space-2)';
-      divider.style.borderBottom = '1px solid var(--color-border)';
-      divider.style.paddingBottom = 'var(--space-2)';
-      divider.innerHTML = `<h3 style="font-size:var(--text-lg);font-weight:700;color:var(--color-gold);text-transform:capitalize;letter-spacing:0.05em">📅 ${dayStr}</h3>`;
-      grid.appendChild(divider);
-      lastDay = dayStr;
-    }
-
     const card = document.createElement('div');
     card.className = `match-card animate-fadeInUp stagger-${Math.min(idx + 1, 5)}${state.jornadaLocked ? ' locked' : ''}`;
     card.id = `card-${partido.id}`;
