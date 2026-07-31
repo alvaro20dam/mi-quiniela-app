@@ -39,6 +39,38 @@ const TEAM_EMOJIS = {
   'Leganés': '🥒', 'Real Valladolid': '🟣',
 };
 
+// Colores oficiales de los equipos (Fondo del badge)
+const TEAM_COLORS = {
+  'Real Madrid': 'linear-gradient(135deg, #ffffff 50%, #b9b7b8 50%)',
+  'FC Barcelona': 'linear-gradient(135deg, #004d98 50%, #a50044 50%)', 'Barcelona': 'linear-gradient(135deg, #004d98 50%, #a50044 50%)',
+  'Atlético de Madrid': 'linear-gradient(135deg, #cb3524 50%, #ffffff 50%)', 'Atletico de Madrid': 'linear-gradient(135deg, #cb3524 50%, #ffffff 50%)',
+  'Sevilla FC': 'linear-gradient(135deg, #ffffff 50%, #f01524 50%)', 'Sevilla': 'linear-gradient(135deg, #ffffff 50%, #f01524 50%)',
+  'Real Betis': 'linear-gradient(135deg, #00824b 50%, #ffffff 50%)', 'Betis': 'linear-gradient(135deg, #00824b 50%, #ffffff 50%)',
+  'Real Sociedad': 'linear-gradient(135deg, #005c9e 50%, #ffffff 50%)',
+  'Valencia CF': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)', 'Valencia': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'Villarreal CF': 'linear-gradient(135deg, #fceb00 50%, #002d72 50%)', 'Villarreal': 'linear-gradient(135deg, #fceb00 50%, #002d72 50%)',
+  'Athletic Club': 'linear-gradient(135deg, #ed1c24 50%, #ffffff 50%)',
+  'Rayo Vallecano': 'linear-gradient(135deg, #ffffff 50%, #ed1c24 50%)', 'Rayo Vallecano de Madrid': 'linear-gradient(135deg, #ffffff 50%, #ed1c24 50%)',
+  'Osasuna': 'linear-gradient(135deg, #d42027 50%, #0a1c2c 50%)', 'CA Osasuna': 'linear-gradient(135deg, #d42027 50%, #0a1c2c 50%)',
+  'Celta de Vigo': 'linear-gradient(135deg, #b3d6f2 50%, #ffffff 50%)', 'RC Celta de Vigo': 'linear-gradient(135deg, #b3d6f2 50%, #ffffff 50%)',
+  'Getafe CF': 'linear-gradient(135deg, #004bb1 50%, #003780 50%)', 'Getafe': 'linear-gradient(135deg, #004bb1 50%, #003780 50%)',
+  'Espanyol': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)', 'RCD Espanyol': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)', 'Espanyol de Barcelona': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)',
+  'UD Las Palmas': 'linear-gradient(135deg, #ffd700 50%, #003d95 50%)',
+  'Deportivo Alavés': 'linear-gradient(135deg, #0040a5 50%, #ffffff 50%)',
+  'RCD Mallorca': 'linear-gradient(135deg, #d7262d 50%, #000000 50%)',
+  'Girona FC': 'linear-gradient(135deg, #ff1e00 50%, #ffffff 50%)',
+  'Leganés': 'linear-gradient(135deg, #005096 50%, #ffffff 50%)', 'CD Leganés': 'linear-gradient(135deg, #005096 50%, #ffffff 50%)',
+  'Real Valladolid': 'linear-gradient(135deg, #422a89 50%, #ffffff 50%)', 'Real Valladolid CF': 'linear-gradient(135deg, #422a89 50%, #ffffff 50%)',
+  'Málaga CF': 'linear-gradient(135deg, #00a7e7 50%, #ffffff 50%)',
+  'RC Deportivo La Coruña': 'linear-gradient(135deg, #0053a0 50%, #ffffff 50%)',
+  'Levante UD': 'linear-gradient(135deg, #9b003a 50%, #003fa4 50%)',
+  'Real Racing Club de Santander': 'linear-gradient(135deg, #ffffff 50%, #006e44 50%)',
+  'Real Zaragoza': 'linear-gradient(135deg, #ffffff 50%, #005ca6 50%)',
+  'Sporting de Gijón': 'linear-gradient(135deg, #e4002b 50%, #ffffff 50%)',
+  'Real Oviedo': 'linear-gradient(135deg, #003c71 50%, #ffffff 50%)',
+};
+
+
 document.addEventListener('DOMContentLoaded', async () => {
   // Guard de autenticación: ocultar la página hasta verificar que hay sesión
   document.body.style.visibility = 'hidden';
