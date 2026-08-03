@@ -59,8 +59,18 @@
         <a href="ranking.html" class="nav-link"><span aria-hidden="true">🏆</span> Clasificacion</a>
       </nav>
       <div class="header-user">
-        <div id="user-avatar" class="user-avatar" title="Administrador" aria-label="Avatar de usuario">A</div>
-        <button id="btn-logout" class="btn btn-ghost btn-sm" aria-label="Cerrar sesion">Salir</button>
+        <!-- Profile Chip -->
+        <div class="profile-chip" id="profile-chip">
+          <div class="profile-chip-avatar-wrap">
+            <div id="user-avatar" class="user-avatar profile-chip-avatar" aria-label="Avatar de usuario">A</div>
+            <span class="profile-chip-online" aria-hidden="true"></span>
+          </div>
+          <div class="profile-chip-info">
+            <span id="user-name" class="profile-chip-name">Cargando...</span>
+            <span id="sub-badge" class="profile-chip-badge">Administrador</span>
+          </div>
+        </div>
+        <button id="btn-logout" class="btn btn-ghost btn-sm" aria-label="Cerrar sesion" style="display:none">Salir</button>
       </div>
     </div>
   </header>
