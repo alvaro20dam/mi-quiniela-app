@@ -157,3 +157,50 @@ def me():
         "suscripcion_activa": user[4],
         "fecha_registro": user[5].isoformat() if user[5] else None,
     }), 200
+
+
+from datetime import datetime, timezone
+
+@auth_bp.route("/reset-password", methods=["POST"])
+def reset_password():
+    """
+    Restablece la contraseña utilizando un token válido.
+    """
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Payload JSON requerido."}), 400
+
+    token = data.get("token")
+    new_password = data.get("new_password")
+
+    if not token or not new_password:
+        return jsonify({"error": "Token y nueva contraseña son requeridos."}), 400
+
+    if len(new_password) < 8:
+        return jsonify({"error": "La nueva contraseña debe tener al menos 8 caracteres."}), 400
+
+    # Buscar usuario con ese token
+    user = query(
+        "SELECT id, reset_token_expires FROM usuarios WHERE reset_token = %s",
+        (token,), fetchone=True
+    )
+
+    if not user:
+        return jsonify({"error": "Enlace de recuperación inválido o expirado."}), 400
+
+    user_id, expires = user
+
+    # Verificar expiración
+    if not expires or expires < datetime.now(timezone.utc):
+        return jsonify({"error": "El enlace de recuperación ha expirado. Solicite uno nuevo al administrador."}), 400
+
+    # Encriptar nueva contraseña
+    password_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt(rounds=12))
+
+    # Actualizar contraseña y limpiar token
+    query(
+        "UPDATE usuarios SET password_hash = %s, reset_token = NULL, reset_token_expires = NULL WHERE id = %s",
+        (password_hash.decode("utf-8"), str(user_id))
+    )
+
+    return jsonify({"message": "Contraseña restablecida correctamente. Ya puede iniciar sesión."}), 200

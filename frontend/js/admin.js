@@ -391,7 +391,7 @@ function renderUsuariosTable(lista) {
                 </td>
                 <td style="font-size:12px;opacity:.6">${formatDate(u.ultima_quiniela)}</td>
                 <td style="text-align:right;font-size:12px;opacity:.6">${formatDate(u.fecha_registro)}</td>
-                <td style="text-align:center">
+                <td style="text-align:center; display: flex; gap: 4px; justify-content: center;">
                   <button
                     id="sub-btn-${u.id}"
                     class="toggle-sub-btn ${u.estado_suscripcion ? 'active-sub' : 'inactive-sub'}"
@@ -399,6 +399,9 @@ function renderUsuariosTable(lista) {
                     title="${u.estado_suscripcion ? 'Desactivar suscripcion' : 'Activar suscripcion'}"
                   >
                     ${u.estado_suscripcion ? '\u{1F534} Desactivar' : '\u{1F7E2} Activar'}
+                  </button>
+                  <button class="btn btn-secondary btn-sm" style="padding: 2px 6px; font-size: 11px;" onclick="generarResetLink('${u.id}')" title="Generar link de recuperacion">
+                    🔑 Reset
                   </button>
                 </td>
               </tr>
@@ -726,3 +729,17 @@ window.cambiarEstadoJornada = cambiarEstadoJornada;
 window.ejecutarCalculoPuntos = ejecutarCalculoPuntos;
 window.eliminarJornada = eliminarJornada;
 window.actualizarResultadosAPI = actualizarResultadosAPI;
+
+async function generarResetLink(usuarioId) {
+  const confirmar = window.confirm('¿Generar un enlace de recuperacion para este usuario?');
+  if (!confirmar) return;
+
+  const { data, status } = await api.post(`/admin/usuarios/${usuarioId}/generate-reset-link`, {});
+  
+  if (status === 200) {
+    window.prompt('Enlace de recuperacion generado exitosamente. Copialo y enviaselo al usuario:', data.reset_link);
+  } else {
+    showToast(data?.error || 'Error al generar el enlace.', 'error');
+  }
+}
+window.generarResetLink = generarResetLink;

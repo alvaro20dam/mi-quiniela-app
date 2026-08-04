@@ -15,7 +15,9 @@ from flask import current_app
 import requests
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # Suprimir advertencias SSL en desarrollo
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+import secrets
+import os
 from utils.db import query
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
@@ -728,3 +730,35 @@ def actualizar_resultados():
 
     except Exception as e:
         return jsonify({"error": f"Error procesando la actualización: {str(e)}"}), 500
+
+
+@admin_bp.route("/usuarios/<uuid:user_id>/generate-reset-link", methods=["POST"])
+@jwt_required()
+def generate_reset_link(user_id):
+    """
+    POST /api/admin/usuarios/<user_id>/generate-reset-link
+    Genera un token de reseteo para el usuario y devuelve el enlace.
+    """
+    if not _require_admin():
+        return jsonify({"error": "Acceso denegado."}), 403
+
+    usuario = query("SELECT id FROM usuarios WHERE id = %s", (str(user_id),), fetchone=True)
+    if not usuario:
+        return jsonify({"error": "Usuario no encontrado."}), 404
+
+    token = secrets.token_urlsafe(32)
+    expires = datetime.now(timezone.utc) + timedelta(hours=24)
+
+    query(
+        "UPDATE usuarios SET reset_token = %s, reset_token_expires = %s WHERE id = %s",
+        (token, expires, str(user_id))
+    )
+
+    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:8000").rstrip("/")
+    reset_url = f"{frontend_url}/reset-password.html?token={token}"
+
+    return jsonify({
+        "message": "Enlace de recuperación generado.",
+        "reset_link": reset_url
+    }), 200
+

@@ -200,10 +200,7 @@
         <span class="bottom-nav-icon" aria-hidden="true">🏆</span>
         <span>Ranking</span>
       </a>
-      <button class="bottom-nav-item" id="bnav-logout" aria-label="Cerrar sesión">
-        <span class="bottom-nav-icon" aria-hidden="true">🚪</span>
-        <span>Salir</span>
-      </button>
+
     </div>
   </nav>
 
@@ -237,14 +234,7 @@
         }).observe(progressEl, { childList: true, subtree: true });
       }
 
-      // Bottom nav logout
-      const bnavLogout = document.getElementById('bnav-logout');
-      if (bnavLogout) {
-        bnavLogout.addEventListener('click', async () => {
-          await api.post('/auth/logout', {});
-          window.location.href = 'index.html';
-        });
-      }
+
     });
   </script>
 </body>

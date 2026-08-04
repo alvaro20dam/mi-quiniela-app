@@ -50,11 +50,24 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('¡Bienvenido de vuelta! 🎉', 'success');
         // Pequeño delay para que el usuario vea el toast
         setTimeout(() => {
-          window.location.href = 'dashboard.html';
+          if (data.usuario && data.usuario.rol === 'Administrador') {
+            window.location.href = 'admin.html';
+          } else {
+            window.location.href = 'dashboard.html';
+          }
         }, 600);
       } else {
         showAlert('login-alert', data?.error || 'Error al iniciar sesión.', 'error');
       }
+    });
+  }
+
+  // ── Forgot Password ────────────────────────────────────────
+  const btnForgotPassword = document.getElementById('btn-forgot-password');
+  if (btnForgotPassword) {
+    btnForgotPassword.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.alert('Si ha olvidado su contraseña, por favor contacte al administrador para que genere un enlace de recuperación desde el panel de administración.');
     });
   }
 
@@ -177,32 +190,44 @@ async function loadUserHeader() {
       chip.addEventListener('click', () => openProfileSheet(data));
     }
 
-    // Si el usuario es Administrador, mostrar link a Panel Admin en la barra de navegación y en la barra inferior (móvil)
+    // Si el usuario es Administrador, adaptar la navegación
     if (data.rol === 'Administrador') {
       const isCurrentPage = window.location.pathname.includes('admin.html');
       
       const headerNav = document.querySelector('.header-nav');
-      if (headerNav && !document.getElementById('nav-admin')) {
-        const adminLink = document.createElement('a');
-        adminLink.href = 'admin.html';
-        adminLink.id = 'nav-admin';
-        adminLink.className = `nav-link ${isCurrentPage ? 'active' : ''}`;
-        adminLink.innerHTML = '<span aria-hidden="true">⚙️</span> Panel Admin';
-        headerNav.appendChild(adminLink);
+      if (headerNav) {
+        // Renombrar Mis Quinielas a Historial Global
+        const misQLinkDesktop = headerNav.querySelector('a[href="mis-quinielas.html"]');
+        if (misQLinkDesktop) {
+          misQLinkDesktop.href = 'admin.html?tab=historial';
+          misQLinkDesktop.innerHTML = '<span aria-hidden="true">📋</span> Historial Global';
+        }
+
+        if (!document.getElementById('nav-admin')) {
+          const adminLink = document.createElement('a');
+          adminLink.href = 'admin.html';
+          adminLink.id = 'nav-admin';
+          adminLink.className = `nav-link ${isCurrentPage ? 'active' : ''}`;
+          adminLink.innerHTML = '<span aria-hidden="true">⚙️</span> Panel Admin';
+          headerNav.appendChild(adminLink);
+        }
       }
 
       const bottomNavInner = document.querySelector('.bottom-nav-inner');
-      if (bottomNavInner && !document.getElementById('bnav-admin')) {
-        const adminBnav = document.createElement('a');
-        adminBnav.href = 'admin.html';
-        adminBnav.id = 'bnav-admin';
-        adminBnav.className = `bottom-nav-item ${isCurrentPage ? 'active' : ''}`;
-        adminBnav.innerHTML = '<span class="bottom-nav-icon" aria-hidden="true">⚙️</span><span>Admin</span>';
-        
-        const logoutBtn = document.getElementById('bnav-logout');
-        if (logoutBtn) {
-          bottomNavInner.insertBefore(adminBnav, logoutBtn);
-        } else {
+      if (bottomNavInner) {
+        // Mapear Mis Quinielas a Historial Global
+        const bnavMis = document.getElementById('bnav-mis');
+        if (bnavMis) {
+          bnavMis.href = 'admin.html?tab=historial';
+          bnavMis.innerHTML = '<span class="bottom-nav-icon" aria-hidden="true">📋</span><span>Historial</span>';
+        }
+
+        if (!document.getElementById('bnav-admin')) {
+          const adminBnav = document.createElement('a');
+          adminBnav.href = 'admin.html';
+          adminBnav.id = 'bnav-admin';
+          adminBnav.className = `bottom-nav-item ${isCurrentPage ? 'active' : ''}`;
+          adminBnav.innerHTML = '<span class="bottom-nav-icon" aria-hidden="true">⚙️</span><span>Admin</span>';
           bottomNavInner.appendChild(adminBnav);
         }
       }
