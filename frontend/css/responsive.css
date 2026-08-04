@@ -51,8 +51,10 @@
   .match-teams {
     grid-template-columns: 1fr;
     text-align: center;
+    gap: var(--space-2);
   }
-  .match-vs { display: none; }
+  .match-vs .vs-label { display: none; } /* Ocultar "VS" pero mantener la fecha */
+  .match-date { margin: var(--space-1) 0; font-size: 10px; }
   .team-name { max-width: none; }
 
   .score-inputs { gap: var(--space-2); }

@@ -241,6 +241,28 @@
     </div>
   </main>
 
+  <!-- ── BOTTOM NAVIGATION (Mobile) ────────────────────────── -->
+  <nav class="bottom-nav" aria-label="Navegación principal móvil">
+    <div class="bottom-nav-inner">
+      <a href="dashboard.html" class="bottom-nav-item" id="bnav-dashboard">
+        <span class="bottom-nav-icon" aria-hidden="true">🎯</span>
+        <span>Quiniela</span>
+      </a>
+      <a href="admin.html?tab=historial" class="bottom-nav-item" id="bnav-mis">
+        <span class="bottom-nav-icon" aria-hidden="true">📋</span>
+        <span>Historial</span>
+      </a>
+      <a href="ranking.html" class="bottom-nav-item" id="bnav-ranking">
+        <span class="bottom-nav-icon" aria-hidden="true">🏆</span>
+        <span>Ranking</span>
+      </a>
+      <a href="admin.html?tab=resumen" class="bottom-nav-item active" aria-current="page" id="bnav-admin">
+        <span class="bottom-nav-icon" aria-hidden="true">⚙️</span>
+        <span>Admin</span>
+      </a>
+    </div>
+  </nav>
+
   <div id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
 
   <script src="js/api.js?v=6"></script>

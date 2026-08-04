@@ -22,6 +22,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  if (user.rol === 'Administrador') {
+    window.location.href = 'admin.html?tab=historial';
+    return;
+  }
+
   document.body.style.visibility = 'visible';
   await loadHistory();
   setupLogout();

@@ -38,6 +38,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   await Promise.all([loadGlobalMetrics(), loadJornadasSelector()]);
   populateHistorialJornadaFilter();
   await loadAdminData();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab');
+  if (tab) {
+    switchAdminTab(tab);
+  }
 });
 
 // ── Logout ─────────────────────────────────────────────────────────────────
@@ -561,6 +567,25 @@ function switchAdminTab(tabName) {
     const view = document.getElementById(`view-${t}`);
     if (view) view.style.display = t === tabName ? '' : 'none';
   });
+
+  // Update bottom-nav active state
+  const bnavMis = document.getElementById('bnav-mis');
+  const bnavAdmin = document.getElementById('bnav-admin');
+  if (bnavMis && bnavAdmin) {
+    if (tabName === 'historial') {
+      bnavMis.classList.add('active');
+      bnavAdmin.classList.remove('active');
+    } else {
+      bnavMis.classList.remove('active');
+      bnavAdmin.classList.add('active');
+    }
+  }
+
+  // Update URL without reloading
+  const url = new URL(window.location);
+  url.searchParams.set('tab', tabName);
+  window.history.pushState({}, '', url);
+
   if (tabName === 'historial' && adminState.historial.rows.length === 0) {
     loadHistorial(1);
   }

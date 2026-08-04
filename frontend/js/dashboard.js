@@ -250,7 +250,11 @@ async function renderJornadaData(jornada, partidos) {
 
   // Mostrar/ocultar submit bar según estado
   if (submitBar) {
-    submitBar.style.display = state.jornadaLocked ? 'none' : '';
+    if (state.user && state.user.rol === 'Administrador') {
+      submitBar.style.display = 'none';
+    } else {
+      submitBar.style.display = state.jornadaLocked ? 'none' : '';
+    }
   }
 
   // Renderizar tarjetas de partido
@@ -324,6 +328,8 @@ function getTendency(gLocal, gVisitante) {
 
 // ─── Renderizar una tarjeta de partido ───────────────────────
 function renderMatchCard(partido, locked = false) {
+  const isAdmin = state.user && state.user.rol === 'Administrador';
+
   // La API devuelve fechas en UTC. new Date() las convierte automáticamente a la hora local del navegador.
   const matchDate  = new Date(partido.fecha_partido);
   const datePart   = matchDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -332,7 +338,7 @@ function renderMatchCard(partido, locked = false) {
   const dateStr    = `${datePart}, ${timePart}<br><span style="font-size:0.7em;opacity:0.65">${tzPart}</span>`;
 
   const lockedAttr  = locked ? 'disabled aria-disabled="true"' : '';
-  const lockedBadge = locked ? '<span class="locked-badge">🔒 Cerrado</span>' : '';
+  const lockedBadge = (locked && !isAdmin) ? '<span class="locked-badge">🔒 Cerrado</span>' : '';
 
   // Resultado real si el partido finalizó (para jornadas Calculadas/Cerradas)
   let resultadoReal = '';
@@ -367,6 +373,7 @@ function renderMatchCard(partido, locked = false) {
       </div>
     </div>
 
+    ${isAdmin ? '' : `
     <div class="score-selector" data-partido-id="${partido.id}">
       <div class="score-inputs">
         <!-- Goles Local -->
@@ -406,6 +413,7 @@ function renderMatchCard(partido, locked = false) {
       <span>Pronóstico:</span>
       <span class="tendency-badge tend-empate" id="tendency-badge-${partido.id}">🤝 Empate</span>
     </div>
+    `}
 
     ${resultadoReal}
   `;
