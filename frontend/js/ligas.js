@@ -10,8 +10,8 @@ window.currentLigaId = localStorage.getItem('currentLigaId') ? parseInt(localSto
 async function fetchLigasActivas() {
     try {
         const response = await api.get('/ligas/');
-        if (response && response.ligas) {
-            return response.ligas;
+        if (response && response.data && response.data.ligas) {
+            return response.data.ligas;
         }
         return [];
     } catch (e) {

@@ -209,7 +209,12 @@ async function loadUserHeader() {
           adminLink.id = 'nav-admin';
           adminLink.className = `nav-link ${isCurrentPage ? 'active' : ''}`;
           adminLink.innerHTML = '<span aria-hidden="true">⚙️</span> Panel Admin';
-          headerNav.appendChild(adminLink);
+          const selectLiga = headerNav.querySelector('select');
+          if (selectLiga) {
+            headerNav.insertBefore(adminLink, selectLiga);
+          } else {
+            headerNav.appendChild(adminLink);
+          }
         }
       }
 
