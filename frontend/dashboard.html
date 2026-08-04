@@ -54,6 +54,8 @@
         <a href="ranking.html" class="nav-link">
           <span aria-hidden="true">🏆</span> Clasificación
         </a>
+        <select id="global-liga-selector" class="input" style="padding: 4px 8px; font-size: 0.9em; max-width: 150px; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white; margin-left: 10px;" aria-label="Seleccionar Liga">
+        </select>
       </nav>
 
       <!-- User área -->
@@ -146,7 +148,7 @@
             <h4>Información</h4>
             <div class="sidebar-stat">
               <span class="label">Liga</span>
-              <span class="value">🇪🇸 La Liga</span>
+              <span class="value" id="sidebar-liga-val">Cargando...</span>
             </div>
           </div>
         </aside>
@@ -210,6 +212,7 @@
   <!-- Scripts -->
   <script src="js/api.js?v=5"></script>
   <script src="js/auth.js?v=5"></script>
+  <script src="js/ligas.js?v=5"></script>
   <script src="js/dashboard.js?v=5"></script>
 
   <script>

@@ -67,6 +67,20 @@ const TEAM_COLORS = {
   'SD Huesca': 'linear-gradient(135deg, #0033a0 50%, #e30613 50%)', 'Huesca': 'linear-gradient(135deg, #0033a0 50%, #e30613 50%)',
   'Racing Club Ferrol': 'linear-gradient(135deg, #00703c 50%, #ffffff 50%)', 'Racing de Ferrol': 'linear-gradient(135deg, #00703c 50%, #ffffff 50%)',
   'CD Eldense': 'linear-gradient(135deg, #0033a0 50%, #e30613 50%)', 'Eldense': 'linear-gradient(135deg, #0033a0 50%, #e30613 50%)',
+
+  // Ligas Internacionales Populares
+  'Arsenal FC': 'linear-gradient(135deg, #ef0107 50%, #ffffff 50%)', 'Arsenal': 'linear-gradient(135deg, #ef0107 50%, #ffffff 50%)',
+  'Manchester City FC': 'linear-gradient(135deg, #6cabdd 50%, #ffffff 50%)', 'Manchester City': 'linear-gradient(135deg, #6cabdd 50%, #ffffff 50%)',
+  'Manchester United FC': 'linear-gradient(135deg, #da291c 50%, #000000 50%)', 'Manchester United': 'linear-gradient(135deg, #da291c 50%, #000000 50%)',
+  'Liverpool FC': 'linear-gradient(135deg, #c8102e 50%, #00b2a9 50%)', 'Liverpool': 'linear-gradient(135deg, #c8102e 50%, #00b2a9 50%)',
+  'Chelsea FC': 'linear-gradient(135deg, #034694 50%, #ffffff 50%)', 'Chelsea': 'linear-gradient(135deg, #034694 50%, #ffffff 50%)',
+  'FC Bayern München': 'linear-gradient(135deg, #dc052d 50%, #ffffff 50%)', 'Bayern Munich': 'linear-gradient(135deg, #dc052d 50%, #ffffff 50%)',
+  'Borussia Dortmund': 'linear-gradient(135deg, #fde100 50%, #000000 50%)',
+  'Bayer 04 Leverkusen': 'linear-gradient(135deg, #e32221 50%, #000000 50%)', 'Bayer Leverkusen': 'linear-gradient(135deg, #e32221 50%, #000000 50%)',
+  'Juventus': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'FC Internazionale Milano': 'linear-gradient(135deg, #005ca5 50%, #000000 50%)', 'Inter Milan': 'linear-gradient(135deg, #005ca5 50%, #000000 50%)', 'Inter': 'linear-gradient(135deg, #005ca5 50%, #000000 50%)',
+  'AC Milan': 'linear-gradient(135deg, #fb090b 50%, #000000 50%)', 'Milan': 'linear-gradient(135deg, #fb090b 50%, #000000 50%)',
+  'SSC Napoli': 'linear-gradient(135deg, #12a0d7 50%, #ffffff 50%)', 'Napoli': 'linear-gradient(135deg, #12a0d7 50%, #ffffff 50%)',
 };
 
 
@@ -82,6 +96,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  // Inicializar selector de ligas
+  if (typeof initLigaSelector === 'function') {
+      await initLigaSelector('global-liga-selector');
+  }
+
   // Sesión confirmada → mostrar la página y cargar datos
   document.body.style.visibility = 'visible';
   await loadAllJornadas();   // Cargar lista de jornadas para el carrusel
@@ -91,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ─── Cargar todas las jornadas (carrusel) ─────────────────────
 async function loadAllJornadas() {
-  const { data, status } = await api.get('/jornadas/');
+  const { data, status } = await api.get(`/jornadas/?liga_id=${window.currentLigaId}`);
   if (status === 200 && data?.jornadas) {
     // Ordenar ascendente por número de jornada para el carrusel
     state.allJornadas = [...data.jornadas].sort((a, b) => a.numero_jornada - b.numero_jornada);
@@ -147,7 +166,7 @@ async function loadJornada() {
 
   grid.innerHTML = renderSkeletons(6);
 
-  const { data, status } = await api.get('/jornadas/actual');
+  const { data, status } = await api.get(`/jornadas/actual?liga_id=${window.currentLigaId}`);
 
   if (status === 404) {
     // No hay jornada abierta — mostrar la más reciente si existe
@@ -488,7 +507,7 @@ function updateSubmitProgress() {
 
 // ─── Cargar quiniela existente y repoblar contadores ─────────
 async function loadExistingQuiniela(jornadaId, readOnly = false) {
-  const { data, status } = await api.get(`/quinielas/mia?jornada_id=${jornadaId}`);
+  const { data, status } = await api.get(`/quinielas/mia?jornada_id=${jornadaId}&liga_id=${window.currentLigaId}`);
 
   if (status !== 200 || !data?.existe) return; // No hay quiniela enviada aún
 
