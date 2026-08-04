@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:match*",
+      "destination": "https://quiniela-backend-wtrs.onrender.com/api/:match*"
+    }
+  ]
+}
