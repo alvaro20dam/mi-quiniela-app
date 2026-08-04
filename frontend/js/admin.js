@@ -35,6 +35,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   setupLogout();
 
+  // Inicializar selector de ligas
+  if (typeof initLigaSelector === 'function') {
+      await initLigaSelector('global-liga-selector');
+  }
+
   await Promise.all([loadGlobalMetrics(), loadJornadasSelector()]);
   populateHistorialJornadaFilter();
   await loadAdminData();
@@ -100,7 +105,7 @@ async function loadJornadasSelector() {
   const select = document.getElementById('select-jornada-admin');
   if (!select) return;
 
-  const { data, status } = await api.get('/jornadas/');
+  const { data, status } = await api.get(`/jornadas/?liga_id=${window.currentLigaId}`);
   if (status === 200 && data?.jornadas) {
     adminState.allJornadas = [...data.jornadas].sort((a, b) => b.numero_jornada - a.numero_jornada);
     select.innerHTML = adminState.allJornadas.map(j => {
@@ -135,8 +140,8 @@ async function onJornadaChange(jornadaId) {
 // ────────────────────────────────────────────────────────────────────────────
 async function loadAdminData() {
   const url = adminState.currentJornadaId
-    ? `/admin/status?jornada_id=${adminState.currentJornadaId}`
-    : '/admin/status';
+    ? `/admin/status?jornada_id=${adminState.currentJornadaId}&liga_id=${window.currentLigaId}`
+    : `/admin/status?liga_id=${window.currentLigaId}`;
 
   const { data, status } = await api.get(url);
   
@@ -450,6 +455,7 @@ async function loadHistorial(page = 1) {
   const params = new URLSearchParams({ page, per_page: adminState.historial.per_page });
   if (adminState.historialJornadaFilter) params.set('jornada_id', adminState.historialJornadaFilter);
   if (adminState.historialSearch)        params.set('search', adminState.historialSearch);
+  params.set('liga_id', window.currentLigaId);
 
   const { data, status } = await api.get(`/admin/historial?${params.toString()}`);
   if (status !== 200 || !data) { showToast('Error al cargar historial.', 'error'); return; }
@@ -533,6 +539,7 @@ async function exportarCSV() {
   const params = new URLSearchParams();
   if (adminState.historialJornadaFilter) params.set('jornada_id', adminState.historialJornadaFilter);
   if (adminState.historialSearch)        params.set('search', adminState.historialSearch);
+  params.set('liga_id', window.currentLigaId);
 
   try {
     const url = `${API_BASE}/admin/historial/csv?${params}`;
@@ -611,7 +618,8 @@ async function importarJornada() {
 
   try {
     const { data, status } = await api.post('/admin/jornada/importar', {
-      numero_jornada: numero
+      numero_jornada: numero,
+      liga_id: window.currentLigaId
     });
 
     if (status === 201) {
