@@ -42,6 +42,7 @@ def admin_status():
         return jsonify({"error": "Acceso denegado. Se requieren permisos de Administrador."}), 403
 
     jornada_id = request.args.get("jornada_id")
+    liga_id = request.args.get("liga_id", 1, type=int)
 
     if jornada_id:
         jornada = query(
@@ -53,10 +54,11 @@ def admin_status():
         jornada = query(
             """
             SELECT id, numero_jornada, fecha_limite_envio, estado FROM jornadas
+            WHERE liga_id = %s
             ORDER BY (CASE WHEN estado = 'Abierta' THEN 0 ELSE 1 END), numero_jornada DESC
             LIMIT 1
             """,
-            fetchone=True
+            (liga_id,), fetchone=True
         )
 
     if not jornada:
@@ -583,17 +585,22 @@ def importar_jornada():
 
     data = request.get_json(silent=True) or {}
     numero_jornada = data.get("numero_jornada")
+    liga_id = data.get("liga_id", 1)
 
     if not numero_jornada:
         return jsonify({"error": "Parámetro 'numero_jornada' es requerido."}), 400
+
+    liga = query("SELECT codigo_api FROM ligas WHERE id = %s", (liga_id,), fetchone=True)
+    if not liga:
+        return jsonify({"error": "Liga no encontrada."}), 404
+    codigo_api = liga[0]
 
     api_token = current_app.config.get("FOOTBALL_API_TOKEN")
     if not api_token:
         return jsonify({"error": "FOOTBALL_API_TOKEN no está configurado en el backend."}), 500
 
-    # Lógica para football-data.org (La Liga = PD, id = 2014)
-    # Ejemplo de URL: https://api.football-data.org/v4/competitions/PD/matches?matchday=4
-    url = f"https://api.football-data.org/v4/competitions/PD/matches?matchday={numero_jornada}"
+    # Lógica para football-data.org (dinámico por liga)
+    url = f"https://api.football-data.org/v4/competitions/{codigo_api}/matches?matchday={numero_jornada}"
     headers = {"X-Auth-Token": api_token}
 
     try:
@@ -608,9 +615,9 @@ def importar_jornada():
             return jsonify({"error": f"No se encontraron partidos para la jornada {numero_jornada}."}), 404
         
         # Verificar si la jornada ya existe
-        existing = query("SELECT id FROM jornadas WHERE numero_jornada = %s", (numero_jornada,), fetchone=True)
+        existing = query("SELECT id FROM jornadas WHERE numero_jornada = %s AND liga_id = %s", (numero_jornada, liga_id), fetchone=True)
         if existing:
-            return jsonify({"error": f"La jornada {numero_jornada} ya existe en la base de datos."}), 409
+            return jsonify({"error": f"La jornada {numero_jornada} ya existe en la base de datos para esta liga."}), 409
         
         # Tomar la fecha del primer partido como límite de envío
         # Parse dates (ISO 8601 string)
@@ -618,8 +625,8 @@ def importar_jornada():
         
         # Insertar jornada
         jornada_id_row = query(
-            "INSERT INTO jornadas (numero_jornada, fecha_limite_envio, estado) VALUES (%s, %s, 'Abierta') RETURNING id",
-            (numero_jornada, first_match_utc),
+            "INSERT INTO jornadas (numero_jornada, fecha_limite_envio, estado, liga_id) VALUES (%s, %s, 'Abierta', %s) RETURNING id",
+            (numero_jornada, first_match_utc, liga_id),
             fetchone=True
         )
         jornada_id = jornada_id_row[0]
@@ -679,17 +686,20 @@ def actualizar_resultados():
     if not jornada_id:
         return jsonify({"error": "Parámetro 'jornada_id' es requerido."}), 400
 
-    jornada = query("SELECT numero_jornada FROM jornadas WHERE id = %s", (jornada_id,), fetchone=True)
+    jornada = query("SELECT numero_jornada, liga_id FROM jornadas WHERE id = %s", (jornada_id,), fetchone=True)
     if not jornada:
         return jsonify({"error": "La jornada especificada no existe."}), 404
         
-    numero_jornada = jornada[0]
+    numero_jornada, liga_id = jornada
+
+    liga = query("SELECT codigo_api FROM ligas WHERE id = %s", (liga_id,), fetchone=True)
+    codigo_api = liga[0] if liga else "PD"
 
     api_token = current_app.config.get("FOOTBALL_API_TOKEN")
     if not api_token:
         return jsonify({"error": "FOOTBALL_API_TOKEN no está configurado en el backend."}), 500
 
-    url = f"https://api.football-data.org/v4/competitions/PD/matches?matchday={numero_jornada}"
+    url = f"https://api.football-data.org/v4/competitions/{codigo_api}/matches?matchday={numero_jornada}"
     headers = {"X-Auth-Token": api_token}
 
     try:

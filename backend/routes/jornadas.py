@@ -4,7 +4,7 @@ Rutas de Jornadas — GET /api/jornadas/actual
 Devuelve la jornada actualmente abierta para pronósticos junto con
 todos sus partidos (SIN goles reales, para no dar ventaja al usuario).
 """
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 from utils.db import query
 
@@ -20,15 +20,18 @@ def get_jornada_actual():
     Devuelve la jornada en estado 'Abierta' con su lista de partidos.
     Los goles reales se omiten intencionalmente en esta respuesta.
     """
+    liga_id = request.args.get('liga_id', 1, type=int)
+
     # ── Buscar la jornada actualmente abierta ────────────────────────────────
     jornada = query(
         """
         SELECT id, numero_jornada, fecha_limite_envio, estado
         FROM jornadas
-        WHERE estado = 'Abierta'
+        WHERE estado = 'Abierta' AND liga_id = %s
         ORDER BY numero_jornada ASC
         LIMIT 1
         """,
+        (liga_id,),
         fetchone=True
     )
 
@@ -80,8 +83,10 @@ def list_jornadas():
     GET /api/jornadas/
     Lista todas las jornadas con su estado (para administradores y vista histórica).
     """
+    liga_id = request.args.get('liga_id', 1, type=int)
     rows = query(
-        "SELECT id, numero_jornada, fecha_limite_envio, estado FROM jornadas ORDER BY numero_jornada DESC",
+        "SELECT id, numero_jornada, fecha_limite_envio, estado FROM jornadas WHERE liga_id = %s ORDER BY numero_jornada DESC",
+        (liga_id,),
         fetchall=True
     )
 

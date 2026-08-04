@@ -87,13 +87,13 @@ def submit_quiniela():
 
     # ── Validación 2: Jornada existe y está Abierta ──────────────────────────
     jornada = query(
-        "SELECT id, numero_jornada, fecha_limite_envio, estado FROM jornadas WHERE id = %s",
+        "SELECT id, numero_jornada, fecha_limite_envio, estado, liga_id FROM jornadas WHERE id = %s",
         (jornada_id,), fetchone=True
     )
     if not jornada:
         return jsonify({"error": "Jornada no encontrada."}), 404
 
-    jornada_db_id, numero_jornada, fecha_limite, estado_jornada = jornada
+    jornada_db_id, numero_jornada, fecha_limite, estado_jornada, liga_id = jornada
 
     if estado_jornada != "Abierta":
         return jsonify({
@@ -201,11 +201,11 @@ def submit_quiniela():
                 # Crear nueva cabecera de quiniela
                 cur.execute(
                     """
-                    INSERT INTO quinielas (usuario_id, jornada_id, puntos_totales)
-                    VALUES (%s, %s, 0)
+                    INSERT INTO quinielas (usuario_id, jornada_id, puntos_totales, liga_id)
+                    VALUES (%s, %s, 0, %s)
                     RETURNING id
                     """,
-                    (current_user_id, jornada_db_id)
+                    (current_user_id, jornada_db_id, liga_id)
                 )
                 quiniela_id = str(cur.fetchone()[0])
                 created = True
@@ -255,6 +255,7 @@ def get_ranking():
     o el ranking acumulado total si no se especifica jornada.
     """
     jornada_id = request.args.get("jornada_id")
+    liga_id = request.args.get("liga_id", 1, type=int)
 
     if jornada_id:
         # Ranking de una jornada específica
@@ -264,10 +265,10 @@ def get_ranking():
                    RANK() OVER (ORDER BY q.puntos_totales DESC) AS posicion
             FROM quinielas q
             JOIN usuarios u ON u.id = q.usuario_id
-            WHERE q.jornada_id = %s
+            WHERE q.jornada_id = %s AND q.liga_id = %s
             ORDER BY q.puntos_totales DESC
             """,
-            (jornada_id,), fetchall=True
+            (jornada_id, liga_id), fetchall=True
         )
     else:
         # Ranking acumulado general (suma de todas las jornadas)
@@ -278,10 +279,11 @@ def get_ranking():
                    RANK() OVER (ORDER BY SUM(q.puntos_totales) DESC) AS posicion
             FROM quinielas q
             JOIN usuarios u ON u.id = q.usuario_id
+            WHERE q.liga_id = %s
             GROUP BY u.id, u.nombre, u.email
             ORDER BY puntos_totales DESC
             """,
-            fetchall=True
+            (liga_id,), fetchall=True
         )
 
     ranking = [
@@ -366,6 +368,7 @@ def get_mis_quinielas():
     Incluye detalle de pronósticos por partido con goles reales si disponibles.
     """
     current_user_id = get_jwt_identity()
+    liga_id = request.args.get("liga_id", 1, type=int)
 
     # Obtener todas las quinielas del usuario con info de jornada
     quinielas_rows = query(
@@ -374,10 +377,10 @@ def get_mis_quinielas():
                j.numero_jornada, j.estado AS estado_jornada, j.id AS jornada_id
         FROM quinielas q
         JOIN jornadas j ON j.id = q.jornada_id
-        WHERE q.usuario_id = %s
+        WHERE q.usuario_id = %s AND q.liga_id = %s
         ORDER BY j.numero_jornada DESC
         """,
-        (current_user_id,), fetchall=True
+        (current_user_id, liga_id), fetchall=True
     )
 
     if not quinielas_rows:

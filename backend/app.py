@@ -12,6 +12,7 @@ from routes.auth import auth_bp
 from routes.jornadas import jornadas_bp
 from routes.quinielas import quinielas_bp
 from routes.admin import admin_bp
+from routes.ligas import ligas_bp
 
 
 def create_app(config_class=None):
@@ -63,6 +64,7 @@ def create_app(config_class=None):
     app.register_blueprint(jornadas_bp)
     app.register_blueprint(quinielas_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(ligas_bp)
 
     # ── Health check ─────────────────────────────────────────────────────────
     @app.route("/api/health", methods=["GET"])
