@@ -42,7 +42,6 @@ def admin_status():
         return jsonify({"error": "Acceso denegado. Se requieren permisos de Administrador."}), 403
 
     jornada_id = request.args.get("jornada_id")
-    liga_id = request.args.get("liga_id", 1, type=int)
 
     if jornada_id:
         jornada = query(
@@ -54,11 +53,10 @@ def admin_status():
         jornada = query(
             """
             SELECT id, numero_jornada, fecha_limite_envio, estado FROM jornadas
-            WHERE liga_id = %s
             ORDER BY (CASE WHEN estado = 'Abierta' THEN 0 ELSE 1 END), numero_jornada DESC
             LIMIT 1
             """,
-            (liga_id,), fetchone=True
+            fetchone=True
         )
 
     if not jornada:
