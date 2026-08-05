@@ -39,7 +39,7 @@ async function initLigaSelector(selectorId, onLigaChange) {
     ligas.forEach(liga => {
         const option = document.createElement('option');
         option.value = liga.id;
-        option.textContent = `${liga.bandera_emoji || ''} ${liga.nombre}`.trim();
+        option.textContent = liga.nombre;
         if (liga.id === window.currentLigaId) {
             option.selected = true;
         }

@@ -13,29 +13,33 @@ CREATE TABLE IF NOT EXISTS ligas (
     nombre        VARCHAR(100) NOT NULL,
     codigo_api    VARCHAR(10)  NOT NULL UNIQUE,
     pais          VARCHAR(100) NOT NULL,
-    bandera_emoji VARCHAR(10),
+    logo_url      VARCHAR(255),
     activa        BOOLEAN NOT NULL DEFAULT TRUE,
     orden_display INT NOT NULL DEFAULT 99
 );
 
+-- Migrar la columna si la tabla ya existía con bandera_emoji
+ALTER TABLE ligas ADD COLUMN IF NOT EXISTS logo_url VARCHAR(255);
+ALTER TABLE ligas DROP COLUMN IF EXISTS bandera_emoji;
+
 -- Insertar ligas por defecto si no existen
-INSERT INTO ligas (nombre, codigo_api, pais, bandera_emoji, orden_display)
+INSERT INTO ligas (nombre, codigo_api, pais, logo_url, orden_display)
 VALUES
-    ('La Liga',        'PD',  'España',     '🇪🇸', 1),
-    ('Premier League', 'PL',  'Inglaterra', '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 2),
-    ('Bundesliga',     'BL1', 'Alemania',   '🇩🇪', 3),
-    ('Serie A',        'SA',  'Italia',     '🇮🇹', 4),
-    ('Ligue 1',        'FL1', 'Francia',    '🇫🇷', 5),
-    ('Eredivisie',     'DED', 'Países Bajos', '🇳🇱', 6),
-    ('Primeira Liga',  'PPL', 'Portugal',   '🇵🇹', 7),
-    ('Campeonato Brasileiro', 'BSA', 'Brasil', '🇧🇷', 8),
-    ('Championship',   'ELC', 'Inglaterra', '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 9),
-    ('Champions League', 'CL', 'Europa',    '🇪🇺', 10),
-    ('Europa League',  'EL',  'Europa',     '🇪🇺', 11),
-    ('Copa Libertadores', 'CLI', 'Sudamérica', '🌎', 12),
-    ('Eurocopa',       'EC',  'Europa',     '🇪🇺', 13),
-    ('Mundial',        'WC',  'Mundo',      '🌎', 14)
-ON CONFLICT (codigo_api) DO NOTHING;
+    ('La Liga',        'PD',  'España',     'https://flagcdn.com/es.svg', 1),
+    ('Premier League', 'PL',  'Inglaterra', 'https://flagcdn.com/gb-eng.svg', 2),
+    ('Bundesliga',     'BL1', 'Alemania',   'https://flagcdn.com/de.svg', 3),
+    ('Serie A',        'SA',  'Italia',     'https://flagcdn.com/it.svg', 4),
+    ('Ligue 1',        'FL1', 'Francia',    'https://flagcdn.com/fr.svg', 5),
+    ('Eredivisie',     'DED', 'Países Bajos', 'https://flagcdn.com/nl.svg', 6),
+    ('Primeira Liga',  'PPL', 'Portugal',   'https://flagcdn.com/pt.svg', 7),
+    ('Campeonato Brasileiro', 'BSA', 'Brasil', 'https://flagcdn.com/br.svg', 8),
+    ('Championship',   'ELC', 'Inglaterra', 'https://flagcdn.com/gb-eng.svg', 9),
+    ('Champions League', 'CL', 'Europa',    'https://flagcdn.com/eu.svg', 10),
+    ('Europa League',  'EL',  'Europa',     'https://flagcdn.com/eu.svg', 11),
+    ('Copa Libertadores', 'CLI', 'Sudamérica', 'https://flagcdn.com/un.svg', 12),
+    ('Eurocopa',       'EC',  'Europa',     'https://flagcdn.com/eu.svg', 13),
+    ('Mundial',        'WC',  'Mundo',      'https://flagcdn.com/un.svg', 14)
+ON CONFLICT (codigo_api) DO UPDATE SET logo_url = EXCLUDED.logo_url;
 
 -- 3. Modificar la tabla 'jornadas'
 -- Si liga_id existía (por migration_multi_liga.sql), lo eliminamos

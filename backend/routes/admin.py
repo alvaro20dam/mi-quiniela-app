@@ -593,7 +593,7 @@ def buscar_partidos():
         return jsonify({"error": "FOOTBALL_API_TOKEN no está configurado en el backend."}), 500
 
     # Ligas soportadas en nuestra base de datos (códigos API)
-    ligas_db = query("SELECT id, codigo_api, nombre, bandera_emoji FROM ligas WHERE activa = TRUE", fetchall=True)
+    ligas_db = query("SELECT id, codigo_api, nombre, logo_url FROM ligas WHERE activa = TRUE", fetchall=True)
     ligas_map = {row[1]: {"id": row[0], "nombre": row[2], "bandera": row[3]} for row in ligas_db}
     codigos_api = ",".join(ligas_map.keys())
 

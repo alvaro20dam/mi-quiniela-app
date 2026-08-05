@@ -9,7 +9,7 @@ def get_ligas_activas():
     Obtiene la lista de ligas activas para mostrar en el frontend.
     """
     ligas = query(
-        "SELECT id, nombre, codigo_api, pais, bandera_emoji FROM ligas WHERE activa = TRUE ORDER BY orden_display ASC",
+        "SELECT id, nombre, codigo_api, pais, logo_url FROM ligas WHERE activa = TRUE ORDER BY orden_display ASC",
         fetchall=True
     )
     
@@ -22,7 +22,7 @@ def get_ligas_activas():
             "nombre": row[1],
             "codigo_api": row[2],
             "pais": row[3],
-            "bandera_emoji": row[4]
+            "logo_url": row[4]
         }
         for row in ligas
     ]

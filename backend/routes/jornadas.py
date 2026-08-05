@@ -40,7 +40,7 @@ def get_jornada_actual():
     # ── Obtener los partidos de esa jornada (sin goles reales) ───────────────
     partidos_rows = query(
         """
-        SELECT p.id, p.equipo_local, p.equipo_visitante, p.fecha_partido, p.estado, l.bandera_emoji, l.nombre as liga_nombre
+        SELECT p.id, p.equipo_local, p.equipo_visitante, p.fecha_partido, p.estado, l.logo_url, l.nombre as liga_nombre
         FROM partidos p
         LEFT JOIN ligas l ON p.liga_id = l.id
         WHERE p.jornada_id = %s
@@ -121,7 +121,7 @@ def get_jornada_por_id(jornada_id):
     partidos_rows = query(
         """
         SELECT p.id, p.equipo_local, p.equipo_visitante, p.fecha_partido, p.estado,
-               p.goles_local_real, p.goles_visitante_real, l.bandera_emoji, l.nombre as liga_nombre
+               p.goles_local_real, p.goles_visitante_real, l.logo_url, l.nombre as liga_nombre
         FROM partidos p
         LEFT JOIN ligas l ON p.liga_id = l.id
         WHERE p.jornada_id = %s
