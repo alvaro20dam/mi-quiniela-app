@@ -618,6 +618,15 @@ async function buscarPartidos() {
     
     if (status === 200 && data.partidos) {
       foundPartidosCache = data.partidos;
+      
+      const select = document.getElementById('select-filter-liga');
+      const containerFiltro = document.getElementById('filter-ligas-container');
+      if (select && containerFiltro) {
+        const leagues = [...new Set(data.partidos.map(p => p.liga_nombre))].sort();
+        select.innerHTML = '<option value="">Todas las ligas</option>' + leagues.map(l => `<option value="${l}">${l}</option>`).join('');
+        containerFiltro.style.display = 'flex';
+      }
+
       renderPartidosResultados();
       resultsContainer.style.display = 'block';
     } else {
@@ -633,18 +642,33 @@ async function buscarPartidos() {
 
 function renderPartidosResultados() {
   const container = document.getElementById('buscar-partidos-resultados');
+  const select = document.getElementById('select-filter-liga');
+  const ligaFiltro = select ? select.value : '';
+
   if (!foundPartidosCache || foundPartidosCache.length === 0) {
     container.innerHTML = `<div class="empty-state" style="padding:10px;"><p>No se encontraron partidos en este rango de fechas.</p></div>`;
     return;
   }
 
-  container.innerHTML = foundPartidosCache.map(p => {
+  const partidosMostrados = ligaFiltro 
+    ? foundPartidosCache.filter(p => p.liga_nombre === ligaFiltro)
+    : foundPartidosCache;
+
+  if (partidosMostrados.length === 0) {
+    container.innerHTML = `<div class="empty-state" style="padding:10px;"><p>No hay partidos para la liga seleccionada.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = partidosMostrados.map(p => {
     const isSelected = selectedPartidosForNewJornada.some(sp => sp.id_api === p.id_api);
     return `
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1);${isSelected ? 'background:rgba(245,158,11,0.1)' : ''}">
         <div style="font-size:12px;">
           <strong>${p.equipo_local} vs ${p.equipo_visitante}</strong><br>
-          <span style="opacity:0.7">${new Date(p.fecha_partido).toLocaleString('es-ES')} - ${p.liga_nombre} ${p.liga_bandera}</span>
+          <span style="opacity:0.7;display:flex;align-items:center;gap:4px;margin-top:2px;">
+            ${new Date(p.fecha_partido).toLocaleString('es-ES')} - ${p.liga_nombre} 
+            <img src="${p.liga_bandera}" alt="Bandera" style="width:16px;height:12px;border-radius:2px;object-fit:cover;">
+          </span>
         </div>
         <button class="btn btn-sm ${isSelected ? 'btn-secondary' : 'btn-primary'}" 
                 onclick="togglePartidoSeleccionado(${p.id_api})" 
@@ -688,7 +712,12 @@ function renderPartidosSeleccionados() {
   
   container.innerHTML = selectedPartidosForNewJornada.map((p, i) => `
     <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);padding:8px;border-radius:var(--radius-sm);font-size:12px;">
-      <div><strong>${i+1}. ${p.equipo_local} vs ${p.equipo_visitante}</strong> <span style="opacity:0.7">(${p.liga_bandera})</span></div>
+      <div>
+        <strong>${i+1}. ${p.equipo_local} vs ${p.equipo_visitante}</strong> 
+        <span style="opacity:0.7;display:inline-flex;align-items:center;gap:4px;margin-left:4px;">
+          <img src="${p.liga_bandera}" alt="Bandera" style="width:16px;height:12px;border-radius:2px;object-fit:cover;">
+        </span>
+      </div>
       <button class="btn btn-sm" style="color:var(--color-danger);background:transparent;border:none" onclick="togglePartidoSeleccionado(${p.id_api})">❌</button>
     </div>
   `).join('');
