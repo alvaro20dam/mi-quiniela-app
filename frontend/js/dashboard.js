@@ -491,6 +491,7 @@ function renderMatchCard(partido, locked = false) {
       </div>
       <div class="match-vs">
         <div class="vs-label">VS</div>
+        ${partido.liga_bandera ? `<div style="margin-top:2px;margin-bottom:2px;"><img src="${partido.liga_bandera}" title="${partido.liga_nombre || 'Liga'}" alt="Bandera" style="width:20px;height:14px;border-radius:2px;object-fit:cover;opacity:0.9;"></div>` : ''}
         <div class="match-date">${dateStr}</div>
         ${lockedBadge}
       </div>
