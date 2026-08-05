@@ -20,33 +20,31 @@ def get_jornada_actual():
     Devuelve la jornada en estado 'Abierta' con su lista de partidos.
     Los goles reales se omiten intencionalmente en esta respuesta.
     """
-    liga_id = request.args.get('liga_id', 1, type=int)
-
     # ── Buscar la jornada actualmente abierta ────────────────────────────────
     jornada = query(
         """
-        SELECT id, numero_jornada, fecha_limite_envio, estado
+        SELECT id, nombre, fecha_limite_envio, estado
         FROM jornadas
-        WHERE estado = 'Abierta' AND liga_id = %s
-        ORDER BY numero_jornada ASC
+        WHERE estado = 'Abierta'
+        ORDER BY fecha_limite_envio ASC
         LIMIT 1
         """,
-        (liga_id,),
         fetchone=True
     )
 
     if not jornada:
         return jsonify({"message": "No hay jornada abierta en este momento."}), 404
 
-    jornada_id, numero_jornada, fecha_limite, estado = jornada
+    jornada_id, nombre, fecha_limite, estado = jornada
 
     # ── Obtener los partidos de esa jornada (sin goles reales) ───────────────
     partidos_rows = query(
         """
-        SELECT id, equipo_local, equipo_visitante, fecha_partido, estado
-        FROM partidos
-        WHERE jornada_id = %s
-        ORDER BY fecha_partido ASC
+        SELECT p.id, p.equipo_local, p.equipo_visitante, p.fecha_partido, p.estado, l.bandera_emoji, l.nombre as liga_nombre
+        FROM partidos p
+        LEFT JOIN ligas l ON p.liga_id = l.id
+        WHERE p.jornada_id = %s
+        ORDER BY p.fecha_partido ASC
         """,
         (jornada_id,),
         fetchall=True
@@ -59,6 +57,8 @@ def get_jornada_actual():
             "equipo_visitante": row[2],
             "fecha_partido": row[3].isoformat(),
             "estado": row[4],
+            "liga_bandera": row[5] if row[5] else "",
+            "liga_nombre": row[6] if row[6] else "",
             # Los goles reales NO se incluyen en esta respuesta (diseño intencional)
         }
         for row in (partidos_rows or [])
@@ -67,7 +67,7 @@ def get_jornada_actual():
     return jsonify({
         "jornada": {
             "id": jornada_id,
-            "numero_jornada": numero_jornada,
+            "nombre": nombre,
             "fecha_limite_envio": fecha_limite.isoformat(),
             "estado": estado,
             "total_partidos": len(partidos),
@@ -83,17 +83,15 @@ def list_jornadas():
     GET /api/jornadas/
     Lista todas las jornadas con su estado (para administradores y vista histórica).
     """
-    liga_id = request.args.get('liga_id', 1, type=int)
     rows = query(
-        "SELECT id, numero_jornada, fecha_limite_envio, estado FROM jornadas WHERE liga_id = %s ORDER BY numero_jornada DESC",
-        (liga_id,),
+        "SELECT id, nombre, fecha_limite_envio, estado FROM jornadas ORDER BY fecha_limite_envio DESC",
         fetchall=True
     )
 
     jornadas = [
         {
             "id": row[0],
-            "numero_jornada": row[1],
+            "nombre": row[1],
             "fecha_limite_envio": row[2].isoformat(),
             "estado": row[3],
         }
@@ -112,21 +110,22 @@ def get_jornada_por_id(jornada_id):
     Los goles reales se incluyen sólo si el partido está Finalizado.
     """
     jornada = query(
-        "SELECT id, numero_jornada, fecha_limite_envio, estado FROM jornadas WHERE id = %s",
+        "SELECT id, nombre, fecha_limite_envio, estado FROM jornadas WHERE id = %s",
         (jornada_id,), fetchone=True
     )
     if not jornada:
         return jsonify({"error": "Jornada no encontrada."}), 404
 
-    jornada_id_db, numero_jornada, fecha_limite, estado = jornada
+    jornada_id_db, nombre, fecha_limite, estado = jornada
 
     partidos_rows = query(
         """
-        SELECT id, equipo_local, equipo_visitante, fecha_partido, estado,
-               goles_local_real, goles_visitante_real
-        FROM partidos
-        WHERE jornada_id = %s
-        ORDER BY fecha_partido ASC
+        SELECT p.id, p.equipo_local, p.equipo_visitante, p.fecha_partido, p.estado,
+               p.goles_local_real, p.goles_visitante_real, l.bandera_emoji, l.nombre as liga_nombre
+        FROM partidos p
+        LEFT JOIN ligas l ON p.liga_id = l.id
+        WHERE p.jornada_id = %s
+        ORDER BY p.fecha_partido ASC
         """,
         (jornada_id_db,), fetchall=True
     )
@@ -139,6 +138,8 @@ def get_jornada_por_id(jornada_id):
             "equipo_visitante": row[2],
             "fecha_partido": row[3].isoformat(),
             "estado": row[4],
+            "liga_bandera": row[7] if row[7] else "",
+            "liga_nombre": row[8] if row[8] else "",
         }
         # Solo revelar goles reales si el partido ya terminó
         if row[4] == "Finalizado":
@@ -149,7 +150,7 @@ def get_jornada_por_id(jornada_id):
     return jsonify({
         "jornada": {
             "id": jornada_id_db,
-            "numero_jornada": numero_jornada,
+            "nombre": nombre,
             "fecha_limite_envio": fecha_limite.isoformat(),
             "estado": estado,
             "total_partidos": len(partidos),

@@ -572,35 +572,32 @@ def toggle_suscripcion():
         "estado_suscripcion": nuevo_estado
     }), 200
 
-@admin_bp.route("/jornada/importar", methods=["POST"])
+@admin_bp.route("/partidos/buscar", methods=["GET"])
 @jwt_required()
-def importar_jornada():
+def buscar_partidos():
     """
-    POST /api/admin/jornada/importar
-    Body: { "numero_jornada": 4 }
-    Importa los partidos de la jornada desde football-data.org (La Liga - PD).
+    GET /api/admin/partidos/buscar?dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD
+    Busca partidos en el rango de fechas en la API externa.
     """
     if not _require_admin():
         return jsonify({"error": "Acceso denegado."}), 403
 
-    data = request.get_json(silent=True) or {}
-    numero_jornada = data.get("numero_jornada")
-    liga_id = data.get("liga_id", 1)
+    date_from = request.args.get("dateFrom")
+    date_to = request.args.get("dateTo")
 
-    if not numero_jornada:
-        return jsonify({"error": "Parámetro 'numero_jornada' es requerido."}), 400
-
-    liga = query("SELECT codigo_api FROM ligas WHERE id = %s", (liga_id,), fetchone=True)
-    if not liga:
-        return jsonify({"error": "Liga no encontrada."}), 404
-    codigo_api = liga[0]
+    if not date_from or not date_to:
+        return jsonify({"error": "Parámetros 'dateFrom' y 'dateTo' son requeridos."}), 400
 
     api_token = current_app.config.get("FOOTBALL_API_TOKEN")
     if not api_token:
         return jsonify({"error": "FOOTBALL_API_TOKEN no está configurado en el backend."}), 500
 
-    # Lógica para football-data.org (dinámico por liga)
-    url = f"https://api.football-data.org/v4/competitions/{codigo_api}/matches?matchday={numero_jornada}"
+    # Ligas soportadas en nuestra base de datos (códigos API)
+    ligas_db = query("SELECT id, codigo_api, nombre, bandera_emoji FROM ligas WHERE activa = TRUE", fetchall=True)
+    ligas_map = {row[1]: {"id": row[0], "nombre": row[2], "bandera": row[3]} for row in ligas_db}
+    codigos_api = ",".join(ligas_map.keys())
+
+    url = f"https://api.football-data.org/v4/matches?competitions={codigos_api}&dateFrom={date_from}&dateTo={date_to}"
     headers = {"X-Auth-Token": api_token}
 
     try:
@@ -611,46 +608,76 @@ def importar_jornada():
         matches_data = resp.json()
         matches = matches_data.get("matches", [])
         
-        if not matches:
-            return jsonify({"error": f"No se encontraron partidos para la jornada {numero_jornada}."}), 404
-        
-        # Verificar si la jornada ya existe
-        existing = query("SELECT id FROM jornadas WHERE numero_jornada = %s AND liga_id = %s", (numero_jornada, liga_id), fetchone=True)
-        if existing:
-            return jsonify({"error": f"La jornada {numero_jornada} ya existe en la base de datos para esta liga."}), 409
-        
-        # Tomar la fecha del primer partido como límite de envío
-        # Parse dates (ISO 8601 string)
-        first_match_utc = min([datetime.fromisoformat(m["utcDate"].replace("Z", "+00:00")) for m in matches])
-        
-        # Insertar jornada
-        jornada_id_row = query(
-            "INSERT INTO jornadas (numero_jornada, fecha_limite_envio, estado, liga_id) VALUES (%s, %s, 'Abierta', %s) RETURNING id",
-            (numero_jornada, first_match_utc, liga_id),
-            fetchone=True
-        )
-        jornada_id = jornada_id_row[0]
-        
-        # Insertar partidos
+        # Format the response
+        formatted_matches = []
         for m in matches:
-            equipo_local = m["homeTeam"]["name"]
-            equipo_visitante = m["awayTeam"]["name"]
-            fecha_partido = datetime.fromisoformat(m["utcDate"].replace("Z", "+00:00"))
-            
-            # Limpiar algunos nombres comunes si es necesario, o guardarlos tal cual provee la API
-            # La API usa por ejemplo "Real Madrid CF", "FC Barcelona". Los guardamos tal cual por simplicidad.
-            
-            query(
-                "INSERT INTO partidos (jornada_id, equipo_local, equipo_visitante, fecha_partido, estado) VALUES (%s, %s, %s, %s, 'Programado')",
-                (jornada_id, equipo_local, equipo_visitante, fecha_partido)
-            )
-            
-        return jsonify({
-            "message": f"Jornada {numero_jornada} importada con {len(matches)} partidos exitosamente."
-        }), 201
+            comp_code = m["competition"]["code"]
+            if comp_code in ligas_map:
+                formatted_matches.append({
+                    "id_api": m["id"],
+                    "equipo_local": m["homeTeam"]["name"],
+                    "equipo_visitante": m["awayTeam"]["name"],
+                    "fecha_partido": m["utcDate"],
+                    "liga_id": ligas_map[comp_code]["id"],
+                    "liga_nombre": ligas_map[comp_code]["nombre"],
+                    "liga_bandera": ligas_map[comp_code]["bandera"],
+                    "estado": m["status"]
+                })
+        
+        return jsonify({"partidos": formatted_matches}), 200
 
     except Exception as e:
-        return jsonify({"error": f"Error procesando la importación: {str(e)}"}), 500
+        return jsonify({"error": f"Error procesando la búsqueda: {str(e)}"}), 500
+
+@admin_bp.route("/jornadas/personalizada", methods=["POST"])
+@jwt_required()
+def crear_jornada_personalizada():
+    """
+    POST /api/admin/jornadas/personalizada
+    Body: { "nombre": "Semana 1", "partidos": [ { equipo_local, equipo_visitante, fecha_partido, liga_id }, ... exactly 10 ] }
+    """
+    if not _require_admin():
+        return jsonify({"error": "Acceso denegado."}), 403
+
+    data = request.get_json(silent=True) or {}
+    nombre = data.get("nombre", "Quiniela Semanal").strip()
+    partidos = data.get("partidos", [])
+
+    if not nombre:
+        return jsonify({"error": "El nombre de la jornada es requerido."}), 400
+
+    if not isinstance(partidos, list) or len(partidos) != 10:
+        return jsonify({"error": "Debe proporcionar exactamente 10 partidos para la jornada."}), 400
+
+    try:
+        # Verificar que el nombre no exista
+        existing = query("SELECT id FROM jornadas WHERE nombre = %s", (nombre,), fetchone=True)
+        if existing:
+            return jsonify({"error": f"Ya existe una jornada con el nombre '{nombre}'."}), 409
+
+        # Calcular fecha límite: el inicio del primer partido cronológicamente
+        fechas = [datetime.fromisoformat(p["fecha_partido"].replace("Z", "+00:00")) for p in partidos]
+        fecha_limite = min(fechas)
+
+        # Insertar jornada
+        jornada_row = query(
+            "INSERT INTO jornadas (nombre, fecha_limite_envio, estado) VALUES (%s, %s, 'Abierta') RETURNING id",
+            (nombre, fecha_limite),
+            fetchone=True
+        )
+        jornada_id = jornada_row[0]
+
+        # Insertar partidos
+        for p in partidos:
+            query(
+                "INSERT INTO partidos (jornada_id, equipo_local, equipo_visitante, fecha_partido, estado, liga_id) VALUES (%s, %s, %s, %s, 'Programado', %s)",
+                (jornada_id, p["equipo_local"], p["equipo_visitante"], datetime.fromisoformat(p["fecha_partido"].replace("Z", "+00:00")), p["liga_id"])
+            )
+
+        return jsonify({"message": f"Jornada '{nombre}' creada exitosamente con 10 partidos."}), 201
+
+    except Exception as e:
+        return jsonify({"error": f"Error al crear la jornada: {str(e)}"}), 500
 
 @admin_bp.route("/db-test", methods=["GET"])
 def db_test():
@@ -675,7 +702,7 @@ def actualizar_resultados():
     """
     POST /api/admin/jornada/actualizar-resultados
     Body: { "jornada_id": 1 }
-    Consulta la API y actualiza los marcadores reales de los partidos finalizados.
+    Consulta la API y actualiza los marcadores reales de los partidos finalizados en esa jornada.
     """
     if not _require_admin():
         return jsonify({"error": "Acceso denegado."}), 403
@@ -686,20 +713,28 @@ def actualizar_resultados():
     if not jornada_id:
         return jsonify({"error": "Parámetro 'jornada_id' es requerido."}), 400
 
-    jornada = query("SELECT numero_jornada, liga_id FROM jornadas WHERE id = %s", (jornada_id,), fetchone=True)
+    jornada = query("SELECT nombre FROM jornadas WHERE id = %s", (jornada_id,), fetchone=True)
     if not jornada:
         return jsonify({"error": "La jornada especificada no existe."}), 404
-        
-    numero_jornada, liga_id = jornada
 
-    liga = query("SELECT codigo_api FROM ligas WHERE id = %s", (liga_id,), fetchone=True)
-    codigo_api = liga[0] if liga else "PD"
+    # Buscar el rango de fechas de los partidos de la jornada
+    partidos_db = query("SELECT equipo_local, equipo_visitante, fecha_partido FROM partidos WHERE jornada_id = %s", (jornada_id,), fetchall=True)
+    if not partidos_db:
+        return jsonify({"error": "No hay partidos en esta jornada."}), 404
+        
+    fechas = [p[2] for p in partidos_db]
+    date_from = min(fechas).strftime("%Y-%m-%d")
+    date_to = max(fechas).strftime("%Y-%m-%d")
+
+    # Ligas
+    ligas_db = query("SELECT codigo_api FROM ligas WHERE activa = TRUE", fetchall=True)
+    codigos_api = ",".join([row[0] for row in ligas_db])
 
     api_token = current_app.config.get("FOOTBALL_API_TOKEN")
     if not api_token:
         return jsonify({"error": "FOOTBALL_API_TOKEN no está configurado en el backend."}), 500
 
-    url = f"https://api.football-data.org/v4/competitions/{codigo_api}/matches?matchday={numero_jornada}"
+    url = f"https://api.football-data.org/v4/matches?competitions={codigos_api}&dateFrom={date_from}&dateTo={date_to}"
     headers = {"X-Auth-Token": api_token}
 
     try:
@@ -711,28 +746,29 @@ def actualizar_resultados():
         matches = matches_data.get("matches", [])
         
         if not matches:
-            return jsonify({"error": f"No se encontraron partidos en la API para la jornada {numero_jornada}."}), 404
+            return jsonify({"error": f"No se encontraron partidos en la API para las fechas de la jornada."}), 404
             
         actualizados = 0
         for m in matches:
             if m.get("status") == "FINISHED":
                 equipo_local = m["homeTeam"]["name"]
                 
-                # Manejar posibles nulos si la API no tiene los goles a pesar de estar FINISHED
                 score = m.get("score", {}).get("fullTime", {})
                 goles_local = score.get("home")
                 goles_visitante = score.get("away")
                 
                 if goles_local is not None and goles_visitante is not None:
-                    query(
+                    res = query(
                         """
                         UPDATE partidos 
                         SET estado = 'Finalizado', goles_local_real = %s, goles_visitante_real = %s 
-                        WHERE jornada_id = %s AND equipo_local = %s
+                        WHERE jornada_id = %s AND equipo_local = %s AND estado != 'Finalizado'
                         """,
                         (goles_local, goles_visitante, jornada_id, equipo_local)
                     )
-                    actualizados += 1
+                    # query returns rowcount or None
+                    if res and res > 0:
+                        actualizados += res
                     
         return jsonify({
             "message": f"Se sincronizaron los resultados. Partidos finalizados y actualizados: {actualizados}."

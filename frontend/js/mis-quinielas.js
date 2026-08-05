@@ -130,7 +130,7 @@ function renderHistoryCard(quiniela) {
     <div class="quiniela-history-card animate-fadeInUp">
       <div class="quiniela-history-header" onclick="toggleCard('${quiniela.quiniela_id}')" tabindex="0" role="button" aria-expanded="false">
         <div>
-          <div class="quiniela-history-title">${headerIcon} Jornada ${quiniela.numero_jornada}</div>
+          <div class="quiniela-history-title">${headerIcon} ${quiniela.nombre_jornada || 'Jornada Personalizada'}</div>
           <div class="quiniela-history-meta">Enviada: ${new Date(quiniela.fecha_registro).toLocaleDateString('es-ES')}</div>
         </div>
         <div style="text-align:right">

@@ -23,66 +23,178 @@ const state = {
 };
 
 // Colores oficiales de los equipos (Fondo del badge sin emoji)
-const TEAM_COLORS = {
-  // Primera División
-  'Real Madrid': 'linear-gradient(135deg, #ffffff 50%, #b9b7b8 50%)', 'Real Madrid CF': 'linear-gradient(135deg, #ffffff 50%, #b9b7b8 50%)',
-  'FC Barcelona': 'linear-gradient(135deg, #004d98 50%, #a50044 50%)', 'Barcelona': 'linear-gradient(135deg, #004d98 50%, #a50044 50%)',
-  'Atlético de Madrid': 'linear-gradient(135deg, #cb3524 50%, #ffffff 50%)', 'Atletico de Madrid': 'linear-gradient(135deg, #cb3524 50%, #ffffff 50%)', 'Club Atlético de Madrid': 'linear-gradient(135deg, #cb3524 50%, #ffffff 50%)',
-  'Sevilla FC': 'linear-gradient(135deg, #ffffff 50%, #f01524 50%)', 'Sevilla': 'linear-gradient(135deg, #ffffff 50%, #f01524 50%)',
-  'Real Betis': 'linear-gradient(135deg, #00824b 50%, #ffffff 50%)', 'Betis': 'linear-gradient(135deg, #00824b 50%, #ffffff 50%)', 'Real Betis Balompié': 'linear-gradient(135deg, #00824b 50%, #ffffff 50%)',
-  'Real Sociedad': 'linear-gradient(135deg, #005c9e 50%, #ffffff 50%)', 'Real Sociedad de Fútbol': 'linear-gradient(135deg, #005c9e 50%, #ffffff 50%)',
-  'Valencia CF': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)', 'Valencia': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
-  'Villarreal CF': 'linear-gradient(135deg, #fceb00 50%, #002d72 50%)', 'Villarreal': 'linear-gradient(135deg, #fceb00 50%, #002d72 50%)',
-  'Athletic Club': 'linear-gradient(135deg, #ed1c24 50%, #ffffff 50%)', 'Athletic': 'linear-gradient(135deg, #ed1c24 50%, #ffffff 50%)',
-  'Rayo Vallecano': 'linear-gradient(135deg, #ffffff 50%, #ed1c24 50%)', 'Rayo Vallecano de Madrid': 'linear-gradient(135deg, #ffffff 50%, #ed1c24 50%)',
-  'Osasuna': 'linear-gradient(135deg, #d42027 50%, #0a1c2c 50%)', 'CA Osasuna': 'linear-gradient(135deg, #d42027 50%, #0a1c2c 50%)',
-  'Celta de Vigo': 'linear-gradient(135deg, #b3d6f2 50%, #ffffff 50%)', 'RC Celta de Vigo': 'linear-gradient(135deg, #b3d6f2 50%, #ffffff 50%)',
-  'Getafe CF': 'linear-gradient(135deg, #004bb1 50%, #003780 50%)', 'Getafe': 'linear-gradient(135deg, #004bb1 50%, #003780 50%)',
-  'Espanyol': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)', 'RCD Espanyol': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)', 'Espanyol de Barcelona': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)', 'RCD Espanyol de Barcelona': 'linear-gradient(135deg, #006cd4 50%, #ffffff 50%)',
-  'UD Las Palmas': 'linear-gradient(135deg, #ffd700 50%, #003d95 50%)',
-  'Deportivo Alavés': 'linear-gradient(135deg, #0040a5 50%, #ffffff 50%)', 'Alavés': 'linear-gradient(135deg, #0040a5 50%, #ffffff 50%)',
-  'RCD Mallorca': 'linear-gradient(135deg, #d7262d 50%, #000000 50%)', 'Mallorca': 'linear-gradient(135deg, #d7262d 50%, #000000 50%)',
-  'Girona FC': 'linear-gradient(135deg, #ff1e00 50%, #ffffff 50%)', 'Girona': 'linear-gradient(135deg, #ff1e00 50%, #ffffff 50%)',
-  'Leganés': 'linear-gradient(135deg, #005096 50%, #ffffff 50%)', 'CD Leganés': 'linear-gradient(135deg, #005096 50%, #ffffff 50%)',
-  'Real Valladolid': 'linear-gradient(135deg, #422a89 50%, #ffffff 50%)', 'Real Valladolid CF': 'linear-gradient(135deg, #422a89 50%, #ffffff 50%)',
+﻿const TEAM_COLORS = {
+  'Athletic Club': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Athletic': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Club AtlÚtico de Madrid': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Atleti': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'CA Osasuna': 'linear-gradient(135deg, #ff0000 50%, #000080 50%)',
+  'Osasuna': 'linear-gradient(135deg, #ff0000 50%, #000080 50%)',
+  'RCD Espanyol de Barcelona': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Espanyol': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'FC Barcelona': 'linear-gradient(135deg, #ff0000 50%, #000080 50%)',
+  'Barþa': 'linear-gradient(135deg, #ff0000 50%, #000080 50%)',
+  'Getafe CF': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Getafe': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Mßlaga CF': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Mßlaga': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Real Madrid CF': 'linear-gradient(135deg, #ffffff 50%, #800080 50%)',
+  'Real Madrid': 'linear-gradient(135deg, #ffffff 50%, #800080 50%)',
+  'Rayo Vallecano de Madrid': 'linear-gradient(135deg, #ffffff 50%, #ff0000 50%)',
+  'Rayo Vallecano': 'linear-gradient(135deg, #ffffff 50%, #ff0000 50%)',
+  'Levante UD': 'linear-gradient(135deg, #dc143c 50%, #0000ff 50%)',
+  'Levante': 'linear-gradient(135deg, #dc143c 50%, #0000ff 50%)',
+  'Real Betis BalompiÚ': 'linear-gradient(135deg, #008000 50%, #ffffff 50%)',
+  'Real Betis': 'linear-gradient(135deg, #008000 50%, #ffffff 50%)',
+  'Real Sociedad de F·tbol': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Real Sociedad': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Villarreal CF': 'linear-gradient(135deg, #ffff00 50%, #0000ff 50%)',
+  'Villarreal': 'linear-gradient(135deg, #ffff00 50%, #0000ff 50%)',
+  'Valencia CF': 'linear-gradient(135deg, #ffffff 50%, #ffa500 50%)',
+  'Valencia': 'linear-gradient(135deg, #ffffff 50%, #ffa500 50%)',
+  'Deportivo AlavÚs': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'AlavÚs': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Elche CF': 'linear-gradient(135deg, #ffffff 50%, #008000 50%)',
+  'Elche': 'linear-gradient(135deg, #ffffff 50%, #008000 50%)',
+  'RC Celta de Vigo': 'linear-gradient(135deg, #87ceeb 50%, #ffffff 50%)',
+  'Celta': 'linear-gradient(135deg, #87ceeb 50%, #ffffff 50%)',
+  'Sevilla FC': 'linear-gradient(135deg, #ffffff 50%, #ff0000 50%)',
+  'RC Deportivo La Coru±a': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Deportivo': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Real Racing Club de Santander': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'Santander': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'Arsenal FC': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Arsenal': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Aston Villa FC': 'linear-gradient(135deg, #7f1734 50%, #87ceeb 50%)',
+  'Aston Villa': 'linear-gradient(135deg, #7f1734 50%, #87ceeb 50%)',
+  'Chelsea FC': 'linear-gradient(135deg, #4169e1 50%, #ffffff 50%)',
+  'Chelsea': 'linear-gradient(135deg, #4169e1 50%, #ffffff 50%)',
+  'Everton FC': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Everton': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Fulham FC': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'Fulham': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'Liverpool FC': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Liverpool': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Manchester City FC': 'linear-gradient(135deg, #87ceeb 50%, #ffffff 50%)',
+  'Man City': 'linear-gradient(135deg, #87ceeb 50%, #ffffff 50%)',
+  'Manchester United FC': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Man United': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Newcastle United FC': 'linear-gradient(135deg, #000000 50%, #ffffff 50%)',
+  'Newcastle': 'linear-gradient(135deg, #000000 50%, #ffffff 50%)',
+  'Sunderland AFC': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Sunderland': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Tottenham Hotspur FC': 'linear-gradient(135deg, #000080 50%, #ffffff 50%)',
+  'Tottenham': 'linear-gradient(135deg, #000080 50%, #ffffff 50%)',
+  'Hull City AFC': 'linear-gradient(135deg, #ffa500 50%, #000000 50%)',
+  'Hull City': 'linear-gradient(135deg, #ffa500 50%, #000000 50%)',
+  'Leeds United FC': 'linear-gradient(135deg, #ffffff 50%, #0000ff 50%)',
+  'Leeds United': 'linear-gradient(135deg, #ffffff 50%, #0000ff 50%)',
+  'Ipswich Town FC': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Ipswich Town': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Nottingham Forest FC': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Nottingham': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Crystal Palace FC': 'linear-gradient(135deg, #ff0000 50%, #0000ff 50%)',
+  'Crystal Palace': 'linear-gradient(135deg, #ff0000 50%, #0000ff 50%)',
+  'Brighton & Hove Albion FC': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Brighton Hove': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Brentford FC': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Brentford': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'AFC Bournemouth': 'linear-gradient(135deg, #ff0000 50%, #000000 50%)',
+  'Bournemouth': 'linear-gradient(135deg, #ff0000 50%, #000000 50%)',
+  'Coventry City FC': 'linear-gradient(135deg, #87ceeb 50%, #ffffff 50%)',
+  'Coventry City': 'linear-gradient(135deg, #87ceeb 50%, #ffffff 50%)',
+  'AC Milan': 'linear-gradient(135deg, #ff0000 50%, #000000 50%)',
+  'Milan': 'linear-gradient(135deg, #ff0000 50%, #000000 50%)',
+  'ACF Fiorentina': 'linear-gradient(135deg, #800080 50%, #ffffff 50%)',
+  'Fiorentina': 'linear-gradient(135deg, #800080 50%, #ffffff 50%)',
+  'AS Roma': 'linear-gradient(135deg, #800000 50%, #ffa500 50%)',
+  'Roma': 'linear-gradient(135deg, #800000 50%, #ffa500 50%)',
+  'Atalanta BC': 'linear-gradient(135deg, #000000 50%, #0000ff 50%)',
+  'Atalanta': 'linear-gradient(135deg, #000000 50%, #0000ff 50%)',
+  'Bologna FC 1909': 'linear-gradient(135deg, #ff0000 50%, #0000ff 50%)',
+  'Bologna': 'linear-gradient(135deg, #ff0000 50%, #0000ff 50%)',
+  'Cagliari Calcio': 'linear-gradient(135deg, #ff0000 50%, #000080 50%)',
+  'Cagliari': 'linear-gradient(135deg, #ff0000 50%, #000080 50%)',
+  'Genoa CFC': 'linear-gradient(135deg, #ff0000 50%, #000080 50%)',
+  'Genoa': 'linear-gradient(135deg, #ff0000 50%, #000080 50%)',
+  'FC Internazionale Milano': 'linear-gradient(135deg, #0000ff 50%, #000000 50%)',
+  'Inter': 'linear-gradient(135deg, #0000ff 50%, #000000 50%)',
+  'Juventus FC': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'Juventus': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'SS Lazio': 'linear-gradient(135deg, #ffffff 50%, #87ceeb 50%)',
+  'Lazio': 'linear-gradient(135deg, #ffffff 50%, #87ceeb 50%)',
+  'Parma Calcio 1913': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'Parma': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'SSC Napoli': 'linear-gradient(135deg, #87ceeb 50%, #ffffff 50%)',
+  'Napoli': 'linear-gradient(135deg, #87ceeb 50%, #ffffff 50%)',
+  'Udinese Calcio': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'Udinese': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
+  'Venezia FC': 'linear-gradient(135deg, #ffa500 50%, #000000 50%)',
+  'Frosinone Calcio': 'linear-gradient(135deg, #ffff00 50%, #0000ff 50%)',
+  'Frosinone': 'linear-gradient(135deg, #ffff00 50%, #0000ff 50%)',
+  'US Sassuolo Calcio': 'linear-gradient(135deg, #008000 50%, #000000 50%)',
+  'Sassuolo': 'linear-gradient(135deg, #008000 50%, #000000 50%)',
+  'Torino FC': 'linear-gradient(135deg, #a52a2a 50%, #ffffff 50%)',
+  'Torino': 'linear-gradient(135deg, #a52a2a 50%, #ffffff 50%)',
+  'US Lecce': 'linear-gradient(135deg, #ffff00 50%, #ff0000 50%)',
+  'Lecce': 'linear-gradient(135deg, #ffff00 50%, #ff0000 50%)',
+  'AC Monza': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Monza': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Como 1907': 'linear-gradient(135deg, #87ceeb 50%, #ffffff 50%)',
+  '1. FC K÷ln': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'TSG 1899 Hoffenheim': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Hoffenheim': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Bayer 04 Leverkusen': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Leverkusen': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Borussia Dortmund': 'linear-gradient(135deg, #000000 50%, #ffff00 50%)',
+  'Dortmund': 'linear-gradient(135deg, #000000 50%, #ffff00 50%)',
+  'FC Bayern M³nchen': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Bayern': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'FC Schalke 04': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Schalke': 'linear-gradient(135deg, #0000ff 50%, #ffffff 50%)',
+  'Hamburger SV': 'linear-gradient(135deg, #ffffff 50%, #ff0000 50%)',
+  'HSV': 'linear-gradient(135deg, #ffffff 50%, #ff0000 50%)',
+  'VfB Stuttgart': 'linear-gradient(135deg, #ffffff 50%, #ff0000 50%)',
+  'Stuttgart': 'linear-gradient(135deg, #ffffff 50%, #ff0000 50%)',
+  'SV Werder Bremen': 'linear-gradient(135deg, #008000 50%, #ffffff 50%)',
+  'Bremen': 'linear-gradient(135deg, #008000 50%, #ffffff 50%)',
+  '1. FSV Mainz 05': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Mainz': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'FC Augsburg': 'linear-gradient(135deg, #ff0000 50%, #008000 50%)',
+  'Augsburg': 'linear-gradient(135deg, #ff0000 50%, #008000 50%)',
+  'SC Freiburg': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Freiburg': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Borussia M÷nchengladbach': 'linear-gradient(135deg, #000000 50%, #ffffff 50%)',
+  'M\'gladbach': 'linear-gradient(135deg, #000000 50%, #ffffff 50%)',
+  'Eintracht Frankfurt': 'linear-gradient(135deg, #ff0000 50%, #000000 50%)',
+  'Frankfurt': 'linear-gradient(135deg, #ff0000 50%, #000000 50%)',
+  '1. FC Union Berlin': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'Union Berlin': 'linear-gradient(135deg, #ff0000 50%, #ffffff 50%)',
+  'SC Paderborn 07': 'linear-gradient(135deg, #000000 50%, #0000ff 50%)',
+  'SC Paderborn': 'linear-gradient(135deg, #000000 50%, #0000ff 50%)',
+  'SV 07 Elversberg': 'linear-gradient(135deg, #000000 50%, #ffffff 50%)',
+  'Elversberg': 'linear-gradient(135deg, #000000 50%, #ffffff 50%)',
+  'RB Leipzig': 'linear-gradient(135deg, #ffffff 50%, #ff0000 50%)',
+};
+
+
+// ─── Generador Dinámico de Colores para Equipos ───────────────
+function getTeamColorGradient(teamName) {
+  if (!teamName) return 'var(--color-bg-glass)';
+  let hash = 0;
+  for (let i = 0; i < teamName.length; i++) {
+    hash = teamName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  // Convertir hash a dos ángulos HSL (Hue)
+  const h1 = Math.abs(hash) % 360;
+  // Usar un color complementario o cercano (por ejemplo, desplazado 45 grados) para el segundo color
+  const h2 = (h1 + 45 + (Math.abs(hash >> 8) % 30)) % 360;
   
-  // Segunda División e Históricos
-  'Málaga CF': 'linear-gradient(135deg, #00a7e7 50%, #ffffff 50%)', 'Málaga': 'linear-gradient(135deg, #00a7e7 50%, #ffffff 50%)',
-  'RC Deportivo La Coruña': 'linear-gradient(135deg, #0053a0 50%, #ffffff 50%)', 'Deportivo La Coruña': 'linear-gradient(135deg, #0053a0 50%, #ffffff 50%)', 'RC Deportivo': 'linear-gradient(135deg, #0053a0 50%, #ffffff 50%)',
-  'Levante UD': 'linear-gradient(135deg, #9b003a 50%, #003fa4 50%)', 'Levante': 'linear-gradient(135deg, #9b003a 50%, #003fa4 50%)',
-  'Real Racing Club de Santander': 'linear-gradient(135deg, #ffffff 50%, #006e44 50%)', 'Racing de Santander': 'linear-gradient(135deg, #ffffff 50%, #006e44 50%)', 'Racing': 'linear-gradient(135deg, #ffffff 50%, #006e44 50%)',
-  'Real Zaragoza': 'linear-gradient(135deg, #ffffff 50%, #005ca6 50%)', 'Zaragoza': 'linear-gradient(135deg, #ffffff 50%, #005ca6 50%)',
-  'Sporting de Gijón': 'linear-gradient(135deg, #e4002b 50%, #ffffff 50%)', 'Real Sporting': 'linear-gradient(135deg, #e4002b 50%, #ffffff 50%)',
-  'Real Oviedo': 'linear-gradient(135deg, #003c71 50%, #ffffff 50%)', 'Oviedo': 'linear-gradient(135deg, #003c71 50%, #ffffff 50%)',
-  'Granada CF': 'linear-gradient(135deg, #c8102e 50%, #ffffff 50%)', 'Granada': 'linear-gradient(135deg, #c8102e 50%, #ffffff 50%)',
-  'Elche CF': 'linear-gradient(135deg, #ffffff 50%, #00602f 50%)', 'Elche': 'linear-gradient(135deg, #ffffff 50%, #00602f 50%)',
-  'Cádiz CF': 'linear-gradient(135deg, #fced00 50%, #004ba0 50%)', 'Cádiz': 'linear-gradient(135deg, #fced00 50%, #004ba0 50%)',
-  'SD Eibar': 'linear-gradient(135deg, #003366 50%, #c8102e 50%)', 'Eibar': 'linear-gradient(135deg, #003366 50%, #c8102e 50%)',
-  'CD Tenerife': 'linear-gradient(135deg, #ffffff 50%, #00458a 50%)', 'Tenerife': 'linear-gradient(135deg, #ffffff 50%, #00458a 50%)',
-  'Albacete Balompié': 'linear-gradient(135deg, #ffffff 50%, #800020 50%)', 'Albacete': 'linear-gradient(135deg, #ffffff 50%, #800020 50%)',
-  'UD Almería': 'linear-gradient(135deg, #da291c 50%, #ffffff 50%)', 'Almería': 'linear-gradient(135deg, #da291c 50%, #ffffff 50%)',
-  'Burgos CF': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)', 'Burgos': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
-  'FC Cartagena': 'linear-gradient(135deg, #000000 50%, #ffffff 50%)', 'Cartagena': 'linear-gradient(135deg, #000000 50%, #ffffff 50%)',
-  'CD Mirandés': 'linear-gradient(135deg, #e00000 50%, #000000 50%)', 'Mirandés': 'linear-gradient(135deg, #e00000 50%, #000000 50%)',
-  'SD Huesca': 'linear-gradient(135deg, #0033a0 50%, #e30613 50%)', 'Huesca': 'linear-gradient(135deg, #0033a0 50%, #e30613 50%)',
-  'Racing Club Ferrol': 'linear-gradient(135deg, #00703c 50%, #ffffff 50%)', 'Racing de Ferrol': 'linear-gradient(135deg, #00703c 50%, #ffffff 50%)',
-  'CD Eldense': 'linear-gradient(135deg, #0033a0 50%, #e30613 50%)', 'Eldense': 'linear-gradient(135deg, #0033a0 50%, #e30613 50%)',
-
-  // Ligas Internacionales Populares
-  'Arsenal FC': 'linear-gradient(135deg, #ef0107 50%, #ffffff 50%)', 'Arsenal': 'linear-gradient(135deg, #ef0107 50%, #ffffff 50%)',
-  'Manchester City FC': 'linear-gradient(135deg, #6cabdd 50%, #ffffff 50%)', 'Manchester City': 'linear-gradient(135deg, #6cabdd 50%, #ffffff 50%)',
-  'Manchester United FC': 'linear-gradient(135deg, #da291c 50%, #000000 50%)', 'Manchester United': 'linear-gradient(135deg, #da291c 50%, #000000 50%)',
-  'Liverpool FC': 'linear-gradient(135deg, #c8102e 50%, #00b2a9 50%)', 'Liverpool': 'linear-gradient(135deg, #c8102e 50%, #00b2a9 50%)',
-  'Chelsea FC': 'linear-gradient(135deg, #034694 50%, #ffffff 50%)', 'Chelsea': 'linear-gradient(135deg, #034694 50%, #ffffff 50%)',
-  'FC Bayern München': 'linear-gradient(135deg, #dc052d 50%, #ffffff 50%)', 'Bayern Munich': 'linear-gradient(135deg, #dc052d 50%, #ffffff 50%)',
-  'Borussia Dortmund': 'linear-gradient(135deg, #fde100 50%, #000000 50%)',
-  'Bayer 04 Leverkusen': 'linear-gradient(135deg, #e32221 50%, #000000 50%)', 'Bayer Leverkusen': 'linear-gradient(135deg, #e32221 50%, #000000 50%)',
-  'Juventus': 'linear-gradient(135deg, #ffffff 50%, #000000 50%)',
-  'FC Internazionale Milano': 'linear-gradient(135deg, #005ca5 50%, #000000 50%)', 'Inter Milan': 'linear-gradient(135deg, #005ca5 50%, #000000 50%)', 'Inter': 'linear-gradient(135deg, #005ca5 50%, #000000 50%)',
-  'AC Milan': 'linear-gradient(135deg, #fb090b 50%, #000000 50%)', 'Milan': 'linear-gradient(135deg, #fb090b 50%, #000000 50%)',
-  'SSC Napoli': 'linear-gradient(135deg, #12a0d7 50%, #ffffff 50%)', 'Napoli': 'linear-gradient(135deg, #12a0d7 50%, #ffffff 50%)',
-};
-
+  // Usar saturación alta (70%) y brillo medio (45%) para contrastar bien en el tema oscuro
+  return `linear-gradient(135deg, hsl(${h1}, 70%, 45%) 50%, hsl(${h2}, 70%, 45%) 50%)`;
+}
+// Exportar por si se necesita en otros scripts
+window.getTeamColorGradient = getTeamColorGradient;
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Guard de autenticación: ocultar la página hasta verificar que hay sesión
@@ -96,10 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Inicializar selector de ligas
-  if (typeof initLigaSelector === 'function') {
-      await initLigaSelector('global-liga-selector');
-  }
+  // Inicializar selector de ligas (obsoleto, la jornada es global)
 
   // Sesión confirmada → mostrar la página y cargar datos
   document.body.style.visibility = 'visible';
@@ -110,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ─── Cargar todas las jornadas (carrusel) ─────────────────────
 async function loadAllJornadas() {
-  const { data, status } = await api.get(`/jornadas/?liga_id=${window.currentLigaId}`);
+  const { data, status } = await api.get(`/jornadas/`);
   if (status === 200 && data?.jornadas) {
     // Ordenar ascendente por número de jornada para el carrusel
     state.allJornadas = [...data.jornadas].sort((a, b) => a.numero_jornada - b.numero_jornada);
@@ -141,7 +250,7 @@ function renderJornadaCarousel(activeJornadaId) {
         data-jornada-id="${j.id}"
         onclick="switchJornada('${j.id}')"
       >
-        <span class="jornada-tab-num">J${j.numero_jornada}</span>
+        <span class="jornada-tab-num">${j.nombre || `J${j.numero_jornada}`}</span>
         <span class="jornada-tab-estado">${info.icon} ${info.label}</span>
       </button>
     `;
@@ -166,7 +275,7 @@ async function loadJornada() {
 
   grid.innerHTML = renderSkeletons(6);
 
-  const { data, status } = await api.get(`/jornadas/actual?liga_id=${window.currentLigaId}`);
+  const { data, status } = await api.get(`/jornadas/actual`);
 
   if (status === 404) {
     // No hay jornada abierta — mostrar la más reciente si existe
@@ -325,9 +434,8 @@ function renderJornadaHeader(jornada) {
   return `
     <div class="jornada-info">
       <div style="margin-bottom:0.5rem">${badge}</div>
-      <h2>Jornada <span class="jornada-num">${jornada.numero_jornada}</span></h2>
-      <p style="color:var(--color-text-muted);font-size:var(--text-sm);margin-top:0.25rem">
-        ${jornada.total_partidos} partidos · La Liga EA Sports
+      <h2>${jornada.nombre || `Jornada <span class="jornada-num">${jornada.numero_jornada}</span>`}</h2>
+        ${jornada.total_partidos} partidos
       </p>
     </div>
     ${countdownHTML}
@@ -372,8 +480,8 @@ function renderMatchCard(partido, locked = false) {
   }
 
   // Colores de los equipos para el fondo del escudo
-  const localColor = TEAM_COLORS[partido.equipo_local] || 'var(--color-bg-glass)';
-  const visColor = TEAM_COLORS[partido.equipo_visitante] || 'var(--color-bg-glass)';
+  const localColor = TEAM_COLORS[partido.equipo_local] || getTeamColorGradient(partido.equipo_local);
+  const visColor = TEAM_COLORS[partido.equipo_visitante] || getTeamColorGradient(partido.equipo_visitante);
 
   return `
     <div class="match-teams">
@@ -507,7 +615,7 @@ function updateSubmitProgress() {
 
 // ─── Cargar quiniela existente y repoblar contadores ─────────
 async function loadExistingQuiniela(jornadaId, readOnly = false) {
-  const { data, status } = await api.get(`/quinielas/mia?jornada_id=${jornadaId}&liga_id=${window.currentLigaId}`);
+  const { data, status } = await api.get(`/quinielas/mia?jornada_id=${jornadaId}`);
 
   if (status !== 200 || !data?.existe) return; // No hay quiniela enviada aún
 

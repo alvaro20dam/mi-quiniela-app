@@ -87,17 +87,17 @@ def submit_quiniela():
 
     # ── Validación 2: Jornada existe y está Abierta ──────────────────────────
     jornada = query(
-        "SELECT id, numero_jornada, fecha_limite_envio, estado, liga_id FROM jornadas WHERE id = %s",
+        "SELECT id, nombre, fecha_limite_envio, estado FROM jornadas WHERE id = %s",
         (jornada_id,), fetchone=True
     )
     if not jornada:
         return jsonify({"error": "Jornada no encontrada."}), 404
 
-    jornada_db_id, numero_jornada, fecha_limite, estado_jornada, liga_id = jornada
+    jornada_db_id, nombre_jornada, fecha_limite, estado_jornada = jornada
 
     if estado_jornada != "Abierta":
         return jsonify({
-            "error": f"La jornada {numero_jornada} ya está cerrada y no admite más pronósticos."
+            "error": f"La jornada {nombre_jornada} ya está cerrada y no admite más pronósticos."
         }), 400
 
     # ── Validación 3: Fecha límite del servidor ──────────────────────────────
@@ -109,7 +109,7 @@ def submit_quiniela():
     if ahora_utc >= fecha_limite:
         return jsonify({
             "error": (
-                f"El plazo de envío para la jornada {numero_jornada} ha vencido. "
+                f"El plazo de envío para la jornada {nombre_jornada} ha vencido. "
                 f"La fecha límite era {fecha_limite.isoformat()}."
             )
         }), 400
@@ -138,7 +138,7 @@ def submit_quiniela():
 
         if partido_id not in ids_partidos_jornada:
             return jsonify({
-                "error": f"El partido {partido_id} no pertenece a la jornada {numero_jornada}."
+                "error": f"El partido {partido_id} no pertenece a la jornada {nombre_jornada}."
             }), 400
 
         if goles_local is None or goles_visitante is None:
@@ -201,11 +201,11 @@ def submit_quiniela():
                 # Crear nueva cabecera de quiniela
                 cur.execute(
                     """
-                    INSERT INTO quinielas (usuario_id, jornada_id, puntos_totales, liga_id)
-                    VALUES (%s, %s, 0, %s)
+                    INSERT INTO quinielas (usuario_id, jornada_id, puntos_totales)
+                    VALUES (%s, %s, 0)
                     RETURNING id
                     """,
-                    (current_user_id, jornada_db_id, liga_id)
+                    (current_user_id, jornada_db_id)
                 )
                 quiniela_id = str(cur.fetchone()[0])
                 created = True
@@ -231,7 +231,7 @@ def submit_quiniela():
     action = "registrada" if created else "actualizada"
 
     return jsonify({
-        "message": f"Quiniela {action} exitosamente para la jornada {numero_jornada}.",
+        "message": f"Quiniela {action} exitosamente para la jornada {nombre_jornada}.",
         "quiniela_id": quiniela_id,
         "total_pronosticos": len(pronosticos_validados),
     }), status_code
@@ -253,9 +253,13 @@ def get_ranking():
     GET /api/quinielas/ranking?jornada_id=1
     Devuelve la tabla de clasificación de usuarios para una jornada específica
     o el ranking acumulado total si no se especifica jornada.
+    Solo para administradores.
     """
+    claims = get_jwt()
+    if claims.get("rol") != "Administrador":
+        return jsonify({"error": "Acceso denegado. Solo administradores pueden ver el ranking global."}), 403
+
     jornada_id = request.args.get("jornada_id")
-    liga_id = request.args.get("liga_id", 1, type=int)
 
     if jornada_id:
         # Ranking de una jornada específica
@@ -265,10 +269,10 @@ def get_ranking():
                    RANK() OVER (ORDER BY q.puntos_totales DESC) AS posicion
             FROM quinielas q
             JOIN usuarios u ON u.id = q.usuario_id
-            WHERE q.jornada_id = %s AND q.liga_id = %s
+            WHERE q.jornada_id = %s
             ORDER BY q.puntos_totales DESC
             """,
-            (jornada_id, liga_id), fetchall=True
+            (jornada_id,), fetchall=True
         )
     else:
         # Ranking acumulado general (suma de todas las jornadas)
@@ -279,11 +283,10 @@ def get_ranking():
                    RANK() OVER (ORDER BY SUM(q.puntos_totales) DESC) AS posicion
             FROM quinielas q
             JOIN usuarios u ON u.id = q.usuario_id
-            WHERE q.liga_id = %s
             GROUP BY u.id, u.nombre, u.email
             ORDER BY puntos_totales DESC
             """,
-            (liga_id,), fetchall=True
+            fetchall=True
         )
 
     ranking = [
@@ -374,13 +377,13 @@ def get_mis_quinielas():
     quinielas_rows = query(
         """
         SELECT q.id, q.puntos_totales, q.fecha_registro,
-               j.numero_jornada, j.estado AS estado_jornada, j.id AS jornada_id
+               j.nombre, j.estado AS estado_jornada, j.id AS jornada_id
         FROM quinielas q
         JOIN jornadas j ON j.id = q.jornada_id
-        WHERE q.usuario_id = %s AND q.liga_id = %s
-        ORDER BY j.numero_jornada DESC
+        WHERE q.usuario_id = %s
+        ORDER BY j.fecha_limite_envio DESC
         """,
-        (current_user_id, liga_id), fetchall=True
+        (current_user_id,), fetchall=True
     )
 
     if not quinielas_rows:
@@ -428,7 +431,7 @@ def get_mis_quinielas():
 
         resultado.append({
             "quiniela_id": str(quiniela_id),
-            "numero_jornada": num_jornada,
+            "nombre_jornada": num_jornada, # num_jornada variable here actually holds 'nombre' from SQL
             "estado_jornada": estado_jornada,
             "jornada_id": str(jornada_id),
             "puntos_totales": puntos_totales or 0,
@@ -457,15 +460,15 @@ def calcular_jornada(jornada_id):
 
     # Verificar que la jornada existe y está Cerrada (lista para calcular)
     jornada = query(
-        "SELECT id, numero_jornada, estado FROM jornadas WHERE id = %s",
+        "SELECT id, nombre, estado FROM jornadas WHERE id = %s",
         (jornada_id,), fetchone=True
     )
     if not jornada:
         return jsonify({"error": "Jornada no encontrada."}), 404
 
-    jornada_db_id, numero_jornada, estado = jornada
+    jornada_db_id, nombre_jornada, estado = jornada
     if estado == "Calculada":
-        return jsonify({"message": f"La jornada {numero_jornada} ya fue calculada."}), 200
+        return jsonify({"message": f"La jornada {nombre_jornada} ya fue calculada."}), 200
     if estado == "Abierta":
         return jsonify({"error": "La jornada debe estar Cerrada antes de calcular."}), 400
 
@@ -534,6 +537,6 @@ def calcular_jornada(jornada_id):
         return jsonify({"error": f"Error durante el cálculo: {str(e)}"}), 500
 
     return jsonify({
-        "message": f"Jornada {numero_jornada} calculada exitosamente.",
+        "message": f"Jornada {nombre_jornada} calculada exitosamente.",
         "quinielas_actualizadas": actualizaciones,
     }), 200

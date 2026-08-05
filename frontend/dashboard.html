@@ -51,11 +51,9 @@
         <a href="mis-quinielas.html" class="nav-link">
           <span aria-hidden="true">📋</span> Mis Quinielas
         </a>
-        <a href="ranking.html" class="nav-link">
+        <a href="ranking.html" class="nav-link" id="nav-ranking" style="display:none">
           <span aria-hidden="true">🏆</span> Clasificación
         </a>
-        <select id="global-liga-selector" class="input" style="padding: 4px 8px; font-size: 0.9em; max-width: 150px; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white; margin-left: 10px;" aria-label="Seleccionar Liga">
-        </select>
       </nav>
 
       <!-- User área -->
@@ -143,14 +141,6 @@
               <span class="value badge badge-error" style="min-width: 60px; text-align: center;">0 pts</span>
             </div>
           </div>
-
-          <div class="sidebar-section">
-            <h4>Información</h4>
-            <div class="sidebar-stat">
-              <span class="label">Liga</span>
-              <span class="value" id="sidebar-liga-val">Cargando...</span>
-            </div>
-          </div>
         </aside>
 
         <!-- Grid de Partidos -->
@@ -198,7 +188,7 @@
         <span class="bottom-nav-icon" aria-hidden="true">📋</span>
         <span>Mis Q.</span>
       </a>
-      <a href="ranking.html" class="bottom-nav-item" id="bnav-ranking">
+      <a href="ranking.html" class="bottom-nav-item" id="bnav-ranking" style="display:none">
         <span class="bottom-nav-icon" aria-hidden="true">🏆</span>
         <span>Ranking</span>
       </a>

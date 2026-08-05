@@ -216,6 +216,9 @@ async function loadUserHeader() {
             headerNav.appendChild(adminLink);
           }
         }
+        
+        const navRanking = document.getElementById('nav-ranking');
+        if (navRanking) navRanking.style.display = '';
       }
 
       const bottomNavInner = document.querySelector('.bottom-nav-inner');
@@ -235,6 +238,9 @@ async function loadUserHeader() {
           adminBnav.innerHTML = '<span class="bottom-nav-icon" aria-hidden="true">⚙️</span><span>Admin</span>';
           bottomNavInner.appendChild(adminBnav);
         }
+        
+        const bnavRanking = document.getElementById('bnav-ranking');
+        if (bnavRanking) bnavRanking.style.display = '';
       }
     }
 

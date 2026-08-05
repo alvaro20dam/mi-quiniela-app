@@ -56,8 +56,9 @@
       <nav class="header-nav" aria-label="Navegacion principal">
         <a href="dashboard.html" class="nav-link"><span aria-hidden="true">🎯</span> Mi Quiniela</a>
         <a href="mis-quinielas.html" class="nav-link"><span aria-hidden="true">📋</span> Mis Quinielas</a>
-        <a href="ranking.html" class="nav-link"><span aria-hidden="true">🏆</span> Clasificacion</a>
-        <select id="global-liga-selector" class="input" style="padding: 4px 8px; font-size: 0.9em; max-width: 150px; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white; margin-left: 10px;" aria-label="Seleccionar Liga"></select>
+        <a href="ranking.html" class="nav-link">
+          <span aria-hidden="true">🏆</span> Clasificación
+        </a>
       </nav>
       <div class="header-user">
         <!-- Profile Chip -->
@@ -140,15 +141,32 @@
       <!-- TAB: RESUMEN -->
       <div id="view-resumen" class="animate-fadeIn">
         
-        <!-- Gestión de Jornadas Nuejas -->
-        <div class="glass-card" style="padding:var(--space-4) var(--space-6);margin-bottom:var(--space-4);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-3);border:1px solid rgba(245,158,11,0.3)">
+        <!-- Gestión de Jornadas Nuejas (Mixed Leagues) -->
+        <div class="glass-card" style="padding:var(--space-4) var(--space-6);margin-bottom:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3);border:1px solid rgba(245,158,11,0.3)">
+          <h3 style="font-size:var(--text-lg);font-weight:700;color:var(--color-warning);">🚀 Crear Nueva Jornada (Quiniela Semanal)</h3>
+          
           <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">
-            <span style="font-weight:600;color:var(--color-warning);">🚀 Importar Nueva Jornada:</span>
-            <input type="number" id="input-import-jornada" class="form-input" style="width:100px" placeholder="N°" min="1" max="38">
-            <button id="btn-import-jornada" class="btn btn-primary btn-sm" onclick="importarJornada()">Descargar Partidos</button>
+            <label style="font-size:var(--text-sm);font-weight:600;">Desde:</label>
+            <input type="date" id="input-date-from" class="form-input" style="width:auto">
+            <label style="font-size:var(--text-sm);font-weight:600;">Hasta:</label>
+            <input type="date" id="input-date-to" class="form-input" style="width:auto">
+            <button id="btn-buscar-partidos" class="btn btn-primary btn-sm" onclick="buscarPartidos()">🔍 Buscar Partidos</button>
           </div>
-          <div style="font-size:var(--text-xs);color:var(--color-text-muted);">
-            Se conectará a football-data.org para La Liga.
+          
+          <div id="buscar-partidos-resultados" style="display:none; max-height: 300px; overflow-y:auto; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-2); margin-top: var(--space-2); background: rgba(0,0,0,0.2);">
+             <!-- Results populated by JS -->
+          </div>
+
+          <div style="margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px dashed var(--color-border);">
+            <h4 style="font-size:var(--text-md);font-weight:600;margin-bottom:var(--space-2)">Partidos Seleccionados (<span id="count-seleccionados">0</span>/10)</h4>
+            <div id="partidos-seleccionados-container" style="display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-3);">
+              <div class="empty-state" style="padding:var(--space-2)"><p>No has seleccionado partidos.</p></div>
+            </div>
+            
+            <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">
+              <input type="text" id="input-nombre-jornada" class="form-input" placeholder="Nombre (ej. Quiniela Semanal)" value="Quiniela Semanal">
+              <button id="btn-crear-jornada" class="btn btn-gold btn-sm" onclick="crearJornadaPersonalizada()" disabled>✅ Crear Jornada (10 partidos)</button>
+            </div>
           </div>
         </div>
 

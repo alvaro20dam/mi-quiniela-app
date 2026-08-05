@@ -35,10 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   setupLogout();
 
-  // Inicializar selector de ligas
-  if (typeof initLigaSelector === 'function') {
-      await initLigaSelector('global-liga-selector');
-  }
+  // Inicializar selector de ligas (obsoleto, la jornada es global)
 
   await Promise.all([loadGlobalMetrics(), loadJornadasSelector()]);
   populateHistorialJornadaFilter();
@@ -105,12 +102,12 @@ async function loadJornadasSelector() {
   const select = document.getElementById('select-jornada-admin');
   if (!select) return;
 
-  const { data, status } = await api.get(`/jornadas/?liga_id=${window.currentLigaId}`);
+  const { data, status } = await api.get(`/jornadas/`);
   if (status === 200 && data?.jornadas) {
-    adminState.allJornadas = [...data.jornadas].sort((a, b) => b.numero_jornada - a.numero_jornada);
+    adminState.allJornadas = [...data.jornadas];
     select.innerHTML = adminState.allJornadas.map(j => {
       const icon = j.estado === 'Abierta' ? '\u{1F7E2}' : j.estado === 'Cerrada' ? '\u{1F512}' : '\u2705';
-      return `<option value="${j.id}">Jornada ${j.numero_jornada} (${icon} ${j.estado})</option>`;
+      return `<option value="${j.id}">${j.nombre} (${icon} ${j.estado})</option>`;
     }).join('');
 
     if (adminState.allJornadas.length > 0) {
@@ -125,7 +122,7 @@ function populateHistorialJornadaFilter() {
   const sel = document.getElementById('filter-jornada-historial');
   if (!sel) return;
   const opts = adminState.allJornadas.map(j =>
-    `<option value="${j.id}">Jornada ${j.numero_jornada}</option>`
+    `<option value="${j.id}">${j.nombre}</option>`
   ).join('');
   sel.innerHTML = '<option value="">Todas las jornadas</option>' + opts;
 }
@@ -140,8 +137,8 @@ async function onJornadaChange(jornadaId) {
 // ────────────────────────────────────────────────────────────────────────────
 async function loadAdminData() {
   const url = adminState.currentJornadaId
-    ? `/admin/status?jornada_id=${adminState.currentJornadaId}&liga_id=${window.currentLigaId}`
-    : `/admin/status?liga_id=${window.currentLigaId}`;
+    ? `/admin/status?jornada_id=${adminState.currentJornadaId}`
+    : `/admin/status`;
 
   const { data, status } = await api.get(url);
   
@@ -455,7 +452,6 @@ async function loadHistorial(page = 1) {
   const params = new URLSearchParams({ page, per_page: adminState.historial.per_page });
   if (adminState.historialJornadaFilter) params.set('jornada_id', adminState.historialJornadaFilter);
   if (adminState.historialSearch)        params.set('search', adminState.historialSearch);
-  params.set('liga_id', window.currentLigaId);
 
   const { data, status } = await api.get(`/admin/historial?${params.toString()}`);
   if (status !== 200 || !data) { showToast('Error al cargar historial.', 'error'); return; }
@@ -487,7 +483,7 @@ function renderHistorialTable(rows, pagination) {
           <tbody>
             ${rows.map(r => `
               <tr>
-                <td><span class="badge badge-info">J${r.numero_jornada}</span></td>
+                <td><span class="badge badge-info">${r.nombre_jornada || r.numero_jornada || 'Jornada'}</span></td>
                 <td><strong>${r.nombre}</strong></td>
                 <td><span style="opacity:.65;font-size:12px">${r.email}</span></td>
                 <td style="text-align:center">
@@ -539,7 +535,6 @@ async function exportarCSV() {
   const params = new URLSearchParams();
   if (adminState.historialJornadaFilter) params.set('jornada_id', adminState.historialJornadaFilter);
   if (adminState.historialSearch)        params.set('search', adminState.historialSearch);
-  params.set('liga_id', window.currentLigaId);
 
   try {
     const url = `${API_BASE}/admin/historial/csv?${params}`;
@@ -601,30 +596,139 @@ function switchAdminTab(tabName) {
 // ────────────────────────────────────────────────────────────────────────────
 // BLOQUE 9: CONTROL DE JORNADA
 // ────────────────────────────────────────────────────────────────────────────
-async function importarJornada() {
-  const inputNum = document.getElementById('input-import-jornada');
-  const btn = document.getElementById('btn-import-jornada');
-  const numero = parseInt(inputNum.value);
+let selectedPartidosForNewJornada = [];
+let foundPartidosCache = [];
 
-  if (!numero || isNaN(numero) || numero < 1 || numero > 38) {
-    showToast('Por favor, ingresa un número de jornada válido (1-38).', 'error');
+async function buscarPartidos() {
+  const dateFrom = document.getElementById('input-date-from').value;
+  const dateTo = document.getElementById('input-date-to').value;
+  const btn = document.getElementById('btn-buscar-partidos');
+  const resultsContainer = document.getElementById('buscar-partidos-resultados');
+
+  if (!dateFrom || !dateTo) {
+    showToast('Por favor, selecciona las fechas Desde y Hasta.', 'error');
     return;
   }
 
-  // Prevenir dobles clics
   btn.disabled = true;
-  const originalText = btn.innerHTML;
-  btn.innerHTML = '⏳ Descargando...';
+  btn.innerHTML = '⏳ Buscando...';
 
   try {
-    const { data, status } = await api.post('/admin/jornada/importar', {
-      numero_jornada: numero,
-      liga_id: window.currentLigaId
-    });
+    const { data, status } = await api.get(`/admin/partidos/buscar?dateFrom=${dateFrom}&dateTo=${dateTo}`);
+    
+    if (status === 200 && data.partidos) {
+      foundPartidosCache = data.partidos;
+      renderPartidosResultados();
+      resultsContainer.style.display = 'block';
+    } else {
+      showToast(data?.error || 'Error al buscar partidos.', 'error');
+    }
+  } catch (error) {
+    showToast('Error de conexión al buscar.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔍 Buscar Partidos';
+  }
+}
 
+function renderPartidosResultados() {
+  const container = document.getElementById('buscar-partidos-resultados');
+  if (!foundPartidosCache || foundPartidosCache.length === 0) {
+    container.innerHTML = `<div class="empty-state" style="padding:10px;"><p>No se encontraron partidos en este rango de fechas.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = foundPartidosCache.map(p => {
+    const isSelected = selectedPartidosForNewJornada.some(sp => sp.id_api === p.id_api);
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1);${isSelected ? 'background:rgba(245,158,11,0.1)' : ''}">
+        <div style="font-size:12px;">
+          <strong>${p.equipo_local} vs ${p.equipo_visitante}</strong><br>
+          <span style="opacity:0.7">${new Date(p.fecha_partido).toLocaleString('es-ES')} - ${p.liga_nombre} ${p.liga_bandera}</span>
+        </div>
+        <button class="btn btn-sm ${isSelected ? 'btn-secondary' : 'btn-primary'}" 
+                onclick="togglePartidoSeleccionado(${p.id_api})" 
+                style="padding:4px 8px;font-size:11px;">
+          ${isSelected ? 'Quitar' : 'Seleccionar'}
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+window.togglePartidoSeleccionado = function(partidoId) {
+  const idx = selectedPartidosForNewJornada.findIndex(p => p.id_api === partidoId);
+  if (idx > -1) {
+    selectedPartidosForNewJornada.splice(idx, 1);
+  } else {
+    if (selectedPartidosForNewJornada.length >= 10) {
+      showToast('Ya has seleccionado 10 partidos. Quita alguno para agregar otro.', 'warning');
+      return;
+    }
+    const partido = foundPartidosCache.find(p => p.id_api === partidoId);
+    if (partido) selectedPartidosForNewJornada.push(partido);
+  }
+  
+  renderPartidosResultados();
+  renderPartidosSeleccionados();
+}
+
+function renderPartidosSeleccionados() {
+  const container = document.getElementById('partidos-seleccionados-container');
+  const countEl = document.getElementById('count-seleccionados');
+  const btnCrear = document.getElementById('btn-crear-jornada');
+  
+  countEl.textContent = selectedPartidosForNewJornada.length;
+  btnCrear.disabled = selectedPartidosForNewJornada.length !== 10;
+  
+  if (selectedPartidosForNewJornada.length === 0) {
+    container.innerHTML = `<div class="empty-state" style="padding:var(--space-2)"><p>No has seleccionado partidos.</p></div>`;
+    return;
+  }
+  
+  container.innerHTML = selectedPartidosForNewJornada.map((p, i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);padding:8px;border-radius:var(--radius-sm);font-size:12px;">
+      <div><strong>${i+1}. ${p.equipo_local} vs ${p.equipo_visitante}</strong> <span style="opacity:0.7">(${p.liga_bandera})</span></div>
+      <button class="btn btn-sm" style="color:var(--color-danger);background:transparent;border:none" onclick="togglePartidoSeleccionado(${p.id_api})">❌</button>
+    </div>
+  `).join('');
+}
+
+async function crearJornadaPersonalizada() {
+  const btn = document.getElementById('btn-crear-jornada');
+  const nombreInput = document.getElementById('input-nombre-jornada').value.trim();
+  
+  if (selectedPartidosForNewJornada.length !== 10) {
+    showToast('Debes seleccionar exactamente 10 partidos.', 'error');
+    return;
+  }
+  
+  if (!nombreInput) {
+    showToast('Debes darle un nombre a la jornada.', 'error');
+    return;
+  }
+  
+  btn.disabled = true;
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Creando...';
+  
+  try {
+    const payload = {
+      nombre: nombreInput,
+      partidos: selectedPartidosForNewJornada
+    };
+    
+    const { data, status } = await api.post('/admin/jornadas/personalizada', payload);
+    
     if (status === 201) {
-      showToast(data.message, 'success');
-      inputNum.value = '';
+      showToast(data.message || 'Jornada creada exitosamente.', 'success');
+      selectedPartidosForNewJornada = [];
+      document.getElementById('input-nombre-jornada').value = 'Quiniela Semanal';
+      renderPartidosSeleccionados();
+      document.getElementById('buscar-partidos-resultados').style.display = 'none';
+      document.getElementById('input-date-from').value = '';
+      document.getElementById('input-date-to').value = '';
+      
       await loadJornadasSelector();
       if (adminState.allJornadas.length > 0) {
         adminState.currentJornadaId = adminState.allJornadas[0].id;
@@ -632,10 +736,10 @@ async function importarJornada() {
         await loadAdminData();
       }
     } else {
-      showToast(data?.error || 'Error al importar jornada.', 'error');
+      showToast(data?.error || 'Error al crear la jornada.', 'error');
     }
-  } catch (error) {
-    showToast('Error de conexión al importar.', 'error');
+  } catch (e) {
+    showToast('Error de conexión al crear jornada.', 'error');
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalText;
@@ -757,7 +861,8 @@ function togglePronosticos(btn, elemId) {
 }
 
 // Exponer funciones al window
-window.importarJornada = importarJornada;
+window.buscarPartidos = buscarPartidos;
+window.crearJornadaPersonalizada = crearJornadaPersonalizada;
 window.cambiarEstadoJornada = cambiarEstadoJornada;
 window.ejecutarCalculoPuntos = ejecutarCalculoPuntos;
 window.eliminarJornada = eliminarJornada;
