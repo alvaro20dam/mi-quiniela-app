@@ -24,7 +24,17 @@ VALUES
     ('La Liga',        'PD',  'España',     '🇪🇸', 1),
     ('Premier League', 'PL',  'Inglaterra', '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 2),
     ('Bundesliga',     'BL1', 'Alemania',   '🇩🇪', 3),
-    ('Serie A',        'SA',  'Italia',     '🇮🇹', 4)
+    ('Serie A',        'SA',  'Italia',     '🇮🇹', 4),
+    ('Ligue 1',        'FL1', 'Francia',    '🇫🇷', 5),
+    ('Eredivisie',     'DED', 'Países Bajos', '🇳🇱', 6),
+    ('Primeira Liga',  'PPL', 'Portugal',   '🇵🇹', 7),
+    ('Campeonato Brasileiro', 'BSA', 'Brasil', '🇧🇷', 8),
+    ('Championship',   'ELC', 'Inglaterra', '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 9),
+    ('Champions League', 'CL', 'Europa',    '🇪🇺', 10),
+    ('Europa League',  'EL',  'Europa',     '🇪🇺', 11),
+    ('Copa Libertadores', 'CLI', 'Sudamérica', '🌎', 12),
+    ('Eurocopa',       'EC',  'Europa',     '🇪🇺', 13),
+    ('Mundial',        'WC',  'Mundo',      '🌎', 14)
 ON CONFLICT (codigo_api) DO NOTHING;
 
 -- 3. Modificar la tabla 'jornadas'
