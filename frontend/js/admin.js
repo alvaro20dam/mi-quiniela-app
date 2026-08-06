@@ -102,7 +102,7 @@ async function loadJornadasSelector() {
   const select = document.getElementById('select-jornada-admin');
   if (!select) return;
 
-  const { data, status } = await api.get(`/jornadas/`);
+  const { data, status } = await api.get(`/jornadas`);
   if (status === 200 && data?.jornadas) {
     adminState.allJornadas = [...data.jornadas];
     select.innerHTML = adminState.allJornadas.map(j => {

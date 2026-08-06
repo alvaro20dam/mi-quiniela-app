@@ -9,6 +9,7 @@ from flask_jwt_extended import jwt_required
 from utils.db import query
 
 jornadas_bp = Blueprint("jornadas", __name__, url_prefix="/api/jornadas")
+jornadas_bp.strict_slashes = False
 
 
 @jornadas_bp.route("/actual", methods=["GET"])

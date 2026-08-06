@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ─── Cargar todas las jornadas (carrusel) ─────────────────────
 async function loadAllJornadas() {
-  const { data, status } = await api.get(`/jornadas/`);
+  const { data, status } = await api.get(`/jornadas`);
   if (status === 200 && data?.jornadas) {
     // Ordenar ascendente por número de jornada para el carrusel
     state.allJornadas = [...data.jornadas].sort((a, b) => a.numero_jornada - b.numero_jornada);
