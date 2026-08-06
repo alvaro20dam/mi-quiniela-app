@@ -113,6 +113,97 @@
       border-radius: 50%;
     }
     .auth-container { position: relative; z-index: 1; }
+
+    /* ── Footer legal fijo ── */
+    .legal-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      text-align: center;
+      padding: 10px 16px;
+      background: linear-gradient(to top, rgba(10,14,26,0.98) 60%, transparent);
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.02em;
+    }
+    .legal-footer a {
+      color: rgba(255,255,255,0.45);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .legal-footer a:hover { color: rgba(255,255,255,0.7); }
+
+    /* ── Modal Aviso Legal ── */
+    .disclaimer-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+      animation: fadeInOverlay 0.2s ease;
+    }
+    .disclaimer-overlay.open { display: flex; }
+    @keyframes fadeInOverlay {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .disclaimer-sheet {
+      background: #141827;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px 20px 0 0;
+      padding: 28px 24px 40px;
+      width: 100%;
+      max-width: 520px;
+      animation: slideUp 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+    .disclaimer-handle {
+      width: 40px;
+      height: 4px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+    .disclaimer-sheet h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .disclaimer-sheet p {
+      font-size: 13px;
+      line-height: 1.65;
+      color: rgba(255,255,255,0.5);
+      margin: 0 0 8px;
+    }
+    .disclaimer-close {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .disclaimer-close:hover { background: rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
@@ -313,14 +404,34 @@
       </section>
 
     </div>
-  
-  <footer style="text-align: center; padding: 20px 10px; margin-top: 40px; border-top: 1px dashed rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); font-size: 12px; line-height: 1.5; padding-bottom: 80px;">
-    <span style="font-size:14px; margin-right:4px;">⚠️</span>
-    <strong>Aviso Legal:</strong> Esta aplicación es estrictamente para uso recreativo y privado entre amigos. <br>
-    No es una plataforma de apuestas, no involucra dinero real y no tiene fines de lucro.
+
+  </main>
+
+  <!-- ── Footer legal fijo (fuera del main) ── -->
+  <footer class="legal-footer">
+    Uso recreativo · privado · sin fines de lucro &nbsp;·&nbsp;
+    <a id="btn-disclaimer" role="button" tabindex="0">Aviso Legal</a>
   </footer>
 
-</main>
+  <!-- ── Modal / Bottom Sheet Aviso Legal ── -->
+  <div id="disclaimer-overlay" class="disclaimer-overlay" role="dialog" aria-modal="true" aria-labelledby="disclaimer-title">
+    <div class="disclaimer-sheet">
+      <div class="disclaimer-handle" aria-hidden="true"></div>
+      <h3 id="disclaimer-title">⚠️ Aviso Legal</h3>
+      <p>
+        Esta aplicación es de uso <strong style="color:rgba(255,255,255,0.75)">estrictamente recreativo y privado</strong>
+        entre amigos. No constituye una plataforma de apuestas ni de juego de azar regulado.
+      </p>
+      <p>
+        No involucra dinero real, no genera beneficio económico para sus operadores y
+        no tiene fines de lucro. Está diseñada exclusivamente como un pasatiempo deportivo.
+      </p>
+      <p>
+        Al usar esta aplicación confirmas que eres mayor de edad y que aceptas estas condiciones.
+      </p>
+      <button class="disclaimer-close" id="btn-disclaimer-close">Entendido</button>
+    </div>
+  </div>
 
   <!-- Toast container -->
   <div id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -328,5 +439,21 @@
   <!-- Scripts -->
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
+  <script>
+    (function () {
+      const overlay = document.getElementById('disclaimer-overlay');
+      const btnOpen = document.getElementById('btn-disclaimer');
+      const btnClose = document.getElementById('btn-disclaimer-close');
+
+      function openDisclaimer() { overlay.classList.add('open'); }
+      function closeDisclaimer() { overlay.classList.remove('open'); }
+
+      btnOpen.addEventListener('click', openDisclaimer);
+      btnOpen.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') openDisclaimer(); });
+      btnClose.addEventListener('click', closeDisclaimer);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDisclaimer(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDisclaimer(); });
+    })();
+  </script>
 </body>
 </html>
