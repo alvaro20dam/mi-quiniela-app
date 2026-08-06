@@ -18,11 +18,13 @@ from utils.db import query
 from utils.points_calculator import calcular_puntos_partido
 
 quinielas_bp = Blueprint("quinielas", __name__, url_prefix="/api/quinielas")
+quinielas_bp.strict_slashes = False
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # POST /api/quinielas — Enviar/actualizar quiniela semanal
 # ─────────────────────────────────────────────────────────────────────────────
+@quinielas_bp.route("", methods=["POST"])
 @quinielas_bp.route("/", methods=["POST"])
 @jwt_required()
 def submit_quiniela():
@@ -49,27 +51,14 @@ def submit_quiniela():
             "error": "Acceso denegado. Los administradores no participan en las quinielas."
         }), 403
 
-    # ── Validación 1: Suscripción activa (del JWT claim + verificación en BD) ─
-    suscripcion_activa_claim = claims.get("suscripcion_activa", False)
-    if not suscripcion_activa_claim:
-        return jsonify({
-            "error": "Acceso denegado. Necesitas una suscripción activa para participar."
-        }), 403
-
-    # Doble verificación en BD (el claim puede estar desactualizado si la suscripción venció)
-    suscripcion_valida = query(
-        """
-        SELECT 1 FROM suscripciones
-        WHERE usuario_id = %s
-          AND estado_activo = TRUE
-          AND fecha_vigencia > NOW()
-        LIMIT 1
-        """,
+    # ── Validación 1: Verificar en BD si el usuario tiene suscripción activa ─
+    user_sub = query(
+        "SELECT estado_suscripcion FROM usuarios WHERE id = %s",
         (current_user_id,), fetchone=True
     )
-    if not suscripcion_valida:
+    if not user_sub or not user_sub[0]:
         return jsonify({
-            "error": "Acceso denegado. Tu suscripción ha vencido o está inactiva."
+            "error": "Acceso denegado. Necesitas una suscripción activa para participar. Por favor contacta al administrador."
         }), 403
 
     # ── Parsear body ─────────────────────────────────────────────────────────

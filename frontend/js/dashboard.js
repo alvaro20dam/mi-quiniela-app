@@ -802,7 +802,7 @@ async function submitQuiniela() {
     pronosticos,
   };
 
-  const { data, status } = await api.post('/quinielas/', payload);
+  const { data, status } = await api.post('/quinielas', payload);
 
   setLoading(btn, false);
 
