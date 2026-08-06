@@ -22,7 +22,7 @@ class Config:
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_COOKIE_SECURE = os.environ.get("JWT_COOKIE_SECURE", "False").lower() == "true"
     JWT_COOKIE_HTTPONLY = True          # Mitiga XSS — JS no puede leer la cookie
-    JWT_COOKIE_SAMESITE = "None" if os.environ.get("FLASK_ENV", "development") == "production" else "Lax"
+    JWT_COOKIE_SAMESITE = "Lax"         # Estándar seguro y compatible con Vercel rewrites
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)
     # Desactivar CSRF temporalmente porque Vercel no puede leer cookies de Render
     JWT_COOKIE_CSRF_PROTECT = False
@@ -48,7 +48,7 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
-    JWT_COOKIE_SECURE = True    # En producción HTTPS es obligatorio
+    JWT_COOKIE_SECURE = False   # Desactivar restricción Secure estricta para evitar rechazo de cookies tras el proxy de Vercel
 
 
 config_map = {

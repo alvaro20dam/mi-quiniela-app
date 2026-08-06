@@ -6,6 +6,8 @@ from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 from config import get_config
 from utils.db import init_db_pool, close_db
 from routes.auth import auth_bp
@@ -21,6 +23,7 @@ def create_app(config_class=None):
     diferentes para desarrollo, producción y testing (TDD).
     """
     app = Flask(__name__)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
     # ── Configuración ────────────────────────────────────────────────────────
     cfg = config_class or get_config()
