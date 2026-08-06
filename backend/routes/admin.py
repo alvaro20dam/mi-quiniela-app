@@ -213,23 +213,24 @@ def cambiar_estado_jornada():
 
     # Verificar que la jornada existe y obtener su estado actual
     jornada = query(
-        "SELECT id, numero_jornada, estado FROM jornadas WHERE id = %s",
+        "SELECT id, nombre, numero_jornada, estado FROM jornadas WHERE id = %s",
         (jornada_id,), fetchone=True
     )
     if not jornada:
         return jsonify({"error": "Jornada no encontrada."}), 404
 
-    _, numero_jornada, estado_actual = jornada
+    _, nombre, numero_jornada, estado_actual = jornada
+    nombre_display = nombre if nombre else (f"Jornada {numero_jornada}" if numero_jornada else f"ID {jornada_id}")
 
     # Validar transiciones lógicas
     if estado_actual == "Calculada":
         return jsonify({
-            "error": f"La jornada {numero_jornada} ya fue calculada y no puede reabrirse ni cerrarse."
+            "error": f"La {nombre_display} ya fue calculada y no puede reabrirse ni cerrarse."
         }), 400
 
     if estado_actual == nuevo_estado:
         return jsonify({
-            "message": f"La jornada {numero_jornada} ya está en estado '{nuevo_estado}'."
+            "message": f"La {nombre_display} ya está en estado '{nuevo_estado}'."
         }), 200
 
     query(
@@ -239,13 +240,13 @@ def cambiar_estado_jornada():
 
     accion = "cerrada" if nuevo_estado == "Cerrada" else "abierta"
     return jsonify({
-        "message": f"Jornada {numero_jornada} {accion} exitosamente.",
+        "message": f"{nombre_display} {accion} exitosamente.",
         "estado_anterior": estado_actual,
         "estado_nuevo": nuevo_estado
     }), 200
 
 
-@admin_bp.route("/jornada/<int:jornada_id>", methods=["DELETE"])
+@admin_bp.route("/jornada/<jornada_id>", methods=["DELETE"])
 @jwt_required()
 def eliminar_jornada(jornada_id):
     """
@@ -255,9 +256,12 @@ def eliminar_jornada(jornada_id):
     if not _require_admin():
         return jsonify({"error": "Acceso denegado. Se requieren permisos de Administrador."}), 403
 
-    jornada = query("SELECT id, numero_jornada FROM jornadas WHERE id = %s", (jornada_id,), fetchone=True)
+    jornada = query("SELECT id, nombre, numero_jornada FROM jornadas WHERE id = %s", (jornada_id,), fetchone=True)
     if not jornada:
         return jsonify({"error": "La jornada no existe."}), 404
+
+    _, nombre, num_jornada = jornada
+    nombre_display = nombre if nombre else (f"Jornada {num_jornada}" if num_jornada else f"ID {jornada_id}")
 
     try:
         # PostgreSQL CASCADE se encargará de borrar partidos, quinielas y pronósticos,
@@ -279,7 +283,7 @@ def eliminar_jornada(jornada_id):
         # Eliminar jornada
         query("DELETE FROM jornadas WHERE id = %s", (jornada_id,))
 
-        return jsonify({"message": f"Jornada {jornada[1]} eliminada con éxito."}), 200
+        return jsonify({"message": f"'{nombre_display}' eliminada con éxito."}), 200
     except Exception as e:
         return jsonify({"error": f"Error eliminando la jornada: {str(e)}"}), 500
 
