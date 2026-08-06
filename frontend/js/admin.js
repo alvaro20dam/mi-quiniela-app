@@ -624,12 +624,17 @@ async function buscarPartidos() {
     const { data, status } = await api.get(`/admin/partidos/buscar?dateFrom=${dateFrom}&dateTo=${dateTo}`);
     
     if (status === 200 && data.partidos) {
-      foundPartidosCache = data.partidos;
+      // Filtrar partidos cuyo día local esté estrictamente dentro del rango seleccionado [dateFrom, dateTo]
+      foundPartidosCache = data.partidos.filter(p => {
+        const d = new Date(p.fecha_partido);
+        const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return localDate >= dateFrom && localDate <= dateTo;
+      });
       
       const select = document.getElementById('select-filter-liga');
       const containerFiltro = document.getElementById('filter-ligas-container');
       if (select && containerFiltro) {
-        const leagues = [...new Set(data.partidos.map(p => p.liga_nombre))].sort();
+        const leagues = [...new Set(foundPartidosCache.map(p => p.liga_nombre))].sort();
         select.innerHTML = '<option value="">Todas las ligas</option>' + leagues.map(l => `<option value="${l}">${l}</option>`).join('');
         containerFiltro.style.display = 'flex';
       }
@@ -828,17 +833,22 @@ async function eliminarJornada() {
   if (status === 200) {
     showToast(data?.message || 'Jornada eliminada exitosamente.', 'success');
     await loadJornadasSelector();
+    populateHistorialJornadaFilter();
+
     if (adminState.allJornadas.length > 0) {
       adminState.currentJornadaId = adminState.allJornadas[0].id;
-      document.getElementById('select-jornada-admin').value = adminState.currentJornadaId;
+      const select = document.getElementById('select-jornada-admin');
+      if (select) select.value = adminState.currentJornadaId;
       await loadAdminData();
     } else {
       adminState.currentJornadaId = null;
-      document.getElementById('select-jornada-admin').innerHTML = '';
-      document.getElementById('participantes-container').innerHTML = '';
-      document.getElementById('pendientes-container').innerHTML = '';
+      const select = document.getElementById('select-jornada-admin');
+      if (select) select.innerHTML = '<option value="">⚠️ Sin jornadas creadas</option>';
+      renderPartidosRealesContainer([]);
+      renderParticipantesContainer([]);
+      renderPendientesContainer([]);
       renderMetrics({total_usuarios: 0, total_enviados: 0, total_pendientes: 0, porcentaje_participacion: 0});
-      renderJornadaEstado('—');
+      renderJornadaEstado(null);
     }
   } else {
     showToast(data?.error || 'Error al eliminar la jornada.', 'error');
