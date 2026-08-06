@@ -129,13 +129,12 @@
         </div>
       </div>
 
-      <!-- 5 Pestanas -->
+      <!-- 4 Pestanas -->
       <div class="admin-tabs" role="tablist">
         <button class="admin-tab active" id="tab-resumen"       onclick="switchAdminTab('resumen')"       role="tab" aria-selected="true">📊 Resumen Jornada</button>
         <button class="admin-tab"        id="tab-participantes"  onclick="switchAdminTab('participantes')"  role="tab" aria-selected="false">✅ Enviadas (<span id="count-tab-participantes">0</span>)</button>
         <button class="admin-tab"        id="tab-pendientes"    onclick="switchAdminTab('pendientes')"    role="tab" aria-selected="false">⏳ Pendientes (<span id="count-tab-pendientes">0</span>)</button>
         <button class="admin-tab"        id="tab-usuarios"      onclick="switchAdminTab('usuarios')"      role="tab" aria-selected="false">👥 Usuarios</button>
-        <button class="admin-tab"        id="tab-historial"     onclick="switchAdminTab('historial')"     role="tab" aria-selected="false">📋 Historial Global</button>
       </div>
 
       <!-- TAB: RESUMEN -->
@@ -249,21 +248,6 @@
         <div id="usuarios-container"><div class="empty-state"><div class="empty-icon">⏳</div><p>Cargando usuarios...</p></div></div>
       </div>
 
-      <!-- TAB: HISTORIAL GLOBAL -->
-      <div id="view-historial" class="animate-fadeIn" style="display:none">
-        <div class="section-toolbar">
-          <div class="toolbar-left">
-            <div class="search-box"><input type="text" id="search-historial" class="form-input" placeholder="🔍 Buscar usuario..." oninput="onHistorialSearch()" /></div>
-            <select id="filter-jornada-historial" class="form-select" style="width:auto;min-width:160px" onchange="onHistorialJornadaChange()">
-              <option value="">Todas las jornadas</option>
-            </select>
-          </div>
-          <button class="btn btn-secondary btn-sm" onclick="exportarCSV()">📥 Exportar CSV</button>
-        </div>
-        <div id="historial-container"><div class="empty-state"><div class="empty-icon">⏳</div><p>Cargando historial...</p></div></div>
-        <div id="historial-pagination" class="pagination-bar" style="display:none"></div>
-      </div>
-
     </div>
 
 </main>
@@ -275,9 +259,9 @@
         <span class="bottom-nav-icon" aria-hidden="true">🎯</span>
         <span>Quiniela</span>
       </a>
-      <a href="admin.html?tab=historial" class="bottom-nav-item" id="bnav-mis">
+      <a href="mis-quinielas.html" class="bottom-nav-item" id="bnav-mis">
         <span class="bottom-nav-icon" aria-hidden="true">📋</span>
-        <span>Historial</span>
+        <span>Mis Q.</span>
       </a>
       <a href="ranking.html" class="bottom-nav-item" id="bnav-ranking">
         <span class="bottom-nav-icon" aria-hidden="true">🏆</span>

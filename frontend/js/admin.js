@@ -570,34 +570,19 @@ async function exportarCSV() {
 // BLOQUE 8: NAVEGACION DE PESTANAS
 // ────────────────────────────────────────────────────────────────────────────
 function switchAdminTab(tabName) {
-  adminState.currentTab = tabName;
-  ['resumen', 'participantes', 'pendientes', 'usuarios', 'historial'].forEach(t => {
-    document.getElementById(`tab-${t}`)?.classList.toggle('active', t === tabName);
+  const validTabs = ['resumen', 'participantes', 'pendientes', 'usuarios'];
+  const targetTab = validTabs.includes(tabName) ? tabName : 'resumen';
+  adminState.currentTab = targetTab;
+  validTabs.forEach(t => {
+    document.getElementById(`tab-${t}`)?.classList.toggle('active', t === targetTab);
     const view = document.getElementById(`view-${t}`);
-    if (view) view.style.display = t === tabName ? '' : 'none';
+    if (view) view.style.display = t === targetTab ? '' : 'none';
   });
-
-  // Update bottom-nav active state
-  const bnavMis = document.getElementById('bnav-mis');
-  const bnavAdmin = document.getElementById('bnav-admin');
-  if (bnavMis && bnavAdmin) {
-    if (tabName === 'historial') {
-      bnavMis.classList.add('active');
-      bnavAdmin.classList.remove('active');
-    } else {
-      bnavMis.classList.remove('active');
-      bnavAdmin.classList.add('active');
-    }
-  }
 
   // Update URL without reloading
   const url = new URL(window.location);
-  url.searchParams.set('tab', tabName);
+  url.searchParams.set('tab', targetTab);
   window.history.pushState({}, '', url);
-
-  if (tabName === 'historial' && adminState.historial.rows.length === 0) {
-    loadHistorial(1);
-  }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
