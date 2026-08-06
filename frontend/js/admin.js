@@ -103,18 +103,25 @@ async function loadJornadasSelector() {
   if (!select) return;
 
   const { data, status } = await api.get(`/jornadas`);
-  if (status === 200 && data?.jornadas) {
+  if (status === 200 && Array.isArray(data?.jornadas)) {
     adminState.allJornadas = [...data.jornadas];
+
+    if (adminState.allJornadas.length === 0) {
+      select.innerHTML = '<option value="">⚠️ Sin jornadas creadas</option>';
+      adminState.currentJornadaId = null;
+      return;
+    }
+
     select.innerHTML = adminState.allJornadas.map(j => {
       const icon = j.estado === 'Abierta' ? '\u{1F7E2}' : j.estado === 'Cerrada' ? '\u{1F512}' : '\u2705';
       return `<option value="${j.id}">${j.nombre} (${icon} ${j.estado})</option>`;
     }).join('');
 
-    if (adminState.allJornadas.length > 0) {
-      const abierta = adminState.allJornadas.find(j => j.estado === 'Abierta');
-      adminState.currentJornadaId = abierta ? abierta.id : adminState.allJornadas[0].id;
-      select.value = adminState.currentJornadaId;
-    }
+    const abierta = adminState.allJornadas.find(j => j.estado === 'Abierta');
+    adminState.currentJornadaId = abierta ? abierta.id : adminState.allJornadas[0].id;
+    select.value = adminState.currentJornadaId;
+  } else {
+    select.innerHTML = '<option value="">⚠️ Error al cargar jornadas</option>';
   }
 }
 

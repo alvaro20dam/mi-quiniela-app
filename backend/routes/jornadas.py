@@ -77,11 +77,12 @@ def get_jornada_actual():
     }), 200
 
 
+@jornadas_bp.route("", methods=["GET"])
 @jornadas_bp.route("/", methods=["GET"])
 @jwt_required()
 def list_jornadas():
     """
-    GET /api/jornadas/
+    GET /api/jornadas
     Lista todas las jornadas con su estado (para administradores y vista histórica).
     """
     rows = query(
@@ -91,9 +92,9 @@ def list_jornadas():
 
     jornadas = [
         {
-            "id": row[0],
+            "id": str(row[0]),
             "nombre": row[1],
-            "fecha_limite_envio": row[2].isoformat(),
+            "fecha_limite_envio": row[2].isoformat() if row[2] else None,
             "estado": row[3],
         }
         for row in (rows or [])
