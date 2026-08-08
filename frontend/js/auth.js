@@ -190,19 +190,12 @@ async function loadUserHeader() {
       chip.addEventListener('click', () => openProfileSheet(data));
     }
 
-    // Si el usuario es Administrador, adaptar la navegación
+    // Si el usuario es Administrador, agregar el enlace al Panel Admin
     if (data.rol === 'Administrador') {
       const isCurrentPage = window.location.pathname.includes('admin.html');
       
       const headerNav = document.querySelector('.header-nav');
       if (headerNav) {
-        // Renombrar Mis Quinielas a Historial Global
-        const misQLinkDesktop = headerNav.querySelector('a[href="mis-quinielas.html"]');
-        if (misQLinkDesktop) {
-          misQLinkDesktop.href = 'admin.html?tab=historial';
-          misQLinkDesktop.innerHTML = '<span aria-hidden="true">📋</span> Historial Global';
-        }
-
         if (!document.getElementById('nav-admin')) {
           const adminLink = document.createElement('a');
           adminLink.href = 'admin.html';
@@ -223,13 +216,6 @@ async function loadUserHeader() {
 
       const bottomNavInner = document.querySelector('.bottom-nav-inner');
       if (bottomNavInner) {
-        // Mapear Mis Quinielas a Historial Global
-        const bnavMis = document.getElementById('bnav-mis');
-        if (bnavMis) {
-          bnavMis.href = 'admin.html?tab=historial';
-          bnavMis.innerHTML = '<span class="bottom-nav-icon" aria-hidden="true">📋</span><span>Historial</span>';
-        }
-
         if (!document.getElementById('bnav-admin')) {
           const adminBnav = document.createElement('a');
           adminBnav.href = 'admin.html';
