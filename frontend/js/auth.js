@@ -135,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutBtn.addEventListener('click', async () => {
       const { status } = await api.post('/auth/logout', {});
       if (status === 200) {
+        sessionStorage.removeItem('user_rol');
         showToast('Sesión cerrada.', 'info');
         setTimeout(() => { window.location.href = 'index.html'; }, 500);
       }
@@ -158,15 +159,37 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
+ * Aplica inmediatamente los ajustes de nav para admin usando la caché de rol.
+ * Esto evita el parpadeo de "Mis Quinielas" mientras se espera la respuesta de la API.
+ */
+function _applyAdminNavCache() {
+  const cachedRol = sessionStorage.getItem('user_rol');
+  if (cachedRol !== 'Administrador') return;
+  // Ocultar preventivamente — se confirma/deshace tras la respuesta real de la API
+  const navMisQ = document.getElementById('nav-mis-quinielas') || document.querySelector('a[href="mis-quinielas.html"]');
+  if (navMisQ) navMisQ.style.display = 'none';
+  const bnavMis = document.getElementById('bnav-mis');
+  if (bnavMis && !window.location.pathname.includes('admin.html')) {
+    bnavMis.style.display = 'none';
+  }
+}
+
+/**
  * Carga la info del usuario autenticado y la muestra en el header.
  * Si no hay sesión, no redirige (permite páginas públicas).
  */
 async function loadUserHeader() {
+  // Aplicar caché inmediatamente para evitar parpadeo
+  _applyAdminNavCache();
+
   const avatarEl = document.getElementById('user-avatar');
   const userNameEl = document.getElementById('user-name');
 
   const { data, status } = await api.get('/auth/me');
   if (status === 200 && data.nombre) {
+    // Guardar rol en caché para próximas páginas (sin parpadeo)
+    sessionStorage.setItem('user_rol', data.rol);
+
     if (avatarEl) avatarEl.textContent = data.nombre.charAt(0).toUpperCase();
     if (userNameEl) userNameEl.textContent = data.nombre;
 
@@ -209,7 +232,12 @@ async function loadUserHeader() {
             headerNav.appendChild(adminLink);
           }
         }
-        
+
+        // Ocultar "Mis Quinielas" — los administradores no participan en quinielas
+        const navMisQ = document.getElementById('nav-mis-quinielas')
+                     || headerNav.querySelector('a[href="mis-quinielas.html"]');
+        if (navMisQ) navMisQ.style.display = 'none';
+
         const navRanking = document.getElementById('nav-ranking');
         if (navRanking) navRanking.style.display = '';
       }
@@ -224,13 +252,30 @@ async function loadUserHeader() {
           adminBnav.innerHTML = '<span class="bottom-nav-icon" aria-hidden="true">⚙️</span><span>Admin</span>';
           bottomNavInner.appendChild(adminBnav);
         }
-        
+
+        // Ocultar "Mis Quinielas" en el bottom nav — los administradores no participan en quinielas
+        const bnavMis = document.getElementById('bnav-mis');
+        if (bnavMis && !window.location.pathname.includes('admin.html')) {
+          bnavMis.style.display = 'none';
+        }
+
         const bnavRanking = document.getElementById('bnav-ranking');
         if (bnavRanking) bnavRanking.style.display = '';
       }
+    } else {
+      // No es admin: limpiar la caché si hubiera un rol previo incorrecto
+      // y asegurarse de que Mis Quinielas es visible (por si _applyAdminNavCache lo ocultó)
+      const navMisQ = document.getElementById('nav-mis-quinielas')
+                   || document.querySelector('a[href="mis-quinielas.html"]');
+      if (navMisQ) navMisQ.style.display = '';
+      const bnavMis = document.getElementById('bnav-mis');
+      if (bnavMis) bnavMis.style.display = '';
     }
 
     return data;
+  } else {
+    // Sin sesión activa — limpiar caché de rol
+    sessionStorage.removeItem('user_rol');
   }
   return null;
 }
